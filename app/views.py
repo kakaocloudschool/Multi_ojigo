@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-
+from django.contrib import messages
 from django.conf import settings
 
 from api_utils.argocd_apis import (
@@ -54,17 +54,23 @@ def new_cluster(request):
                         if resp.status_code == 200:
                             print("클러스터 생성 성공 ")
                             print(resp.text)
+                            messages.success(request, 'Profile details updated.')
+
                             cluster.save()
                             return redirect("/")
                         else:
                             print("서버 생성 실패")
                             print(resp.text)
+                            messages.warning(request, '서버 생성 실패')
                     else:
                         print("토큰 발급 실패")
+                        messages.warning(request, '토큰발급실패')
                 else:
                     print("파일 또는 토큰 확인 필요")
+                    messages.warning(request, '파일 또는 토큰 확인 필요')
             else:
                 print("kubernetes config 파일이 아닙니다")
+                messages.error(request, 'kubernetes config 파일이 아닙니다')
     else:
         form = ClusterForm()
 
