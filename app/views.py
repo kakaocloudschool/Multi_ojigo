@@ -18,6 +18,11 @@ ARGO_PASSWORD = getattr(settings, "ARGO_PASSWORD", None)
 
 # Create your views here.
 @login_required
+def cluster_list(request):
+    qs = Cluster.objects.all()
+    return render(request, "app/cluster_list.html", {"cluster_list": qs})
+
+@login_required
 def app_list(request):
     qs = AppInfo.objects.all()
     return render(request, "index.html", {"appinfo_list": qs})

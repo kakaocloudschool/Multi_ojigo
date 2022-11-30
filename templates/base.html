@@ -61,7 +61,7 @@
                     data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <a class="collapse-item" href="/">통합 배포</a>
-                        <a class="collapse-item" href="/">신규 APP 등록</a>
+                        <a class="collapse-item" href="{% url 'new_app' %}">신규 APP 등록</a>
                     </div>
                 </div>
             </li>
@@ -75,8 +75,8 @@
                 <div id="clustermanage" class="collapse" aria-labelledby="headingUtilities"
                     data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
-                        <a class="collapse-item" href="/">클러스터 리스트</a>
-                        <a class="collapse-item" href="/">클러스터 추가</a>
+                        <a class="collapse-item" href="{% url 'cluster_list' %}">클러스터 리스트</a>
+                        <a class="collapse-item" href="{% url 'new_cluster' %}">클러스터 추가</a>
                     </div>
                 </div>
             </li>
