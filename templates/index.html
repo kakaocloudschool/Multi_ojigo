@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <!-- DataTales Example -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Deploy App List</h6>
+        </div>
+        <div class="card-body">
+            <div class="my-2">
+                <!--추가-->
+                <a href="#" onclick="showPopup0();" class="btn btn-primary" style="float:right; margin-right:15px;">
+                    <span class="icon text-white-50">
+                    </span>
+                    <span class="text">신규 APP 등록</span>
+                </a>
+                <!--추가-->
+                <a href="#" onclick="showPopup1();" class="btn btn-primary" style="float:right; margin-right:15px;">
+                    <span class="icon text-white-50">
+                    </span>
+                    <span class="text">클러스터 등록</span>
+                </a>
+            </div>
+            <br/><br/>
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Appname</th>
+                            <th>Cluster명</th>
+                            <th>Namespace</th>
+                            <th>GIT_URL</th>
+                            <th>Branch</th>
+                            <th>Manifest</th>
+                            <th style="width: 130px;">최종 배포 시간</th>
+                            <th>배포</th>
+                            <th>History</th>
+                            <th>APP 수정</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for app_info in appinfo_list %}
+                        <tr>
+                            <td >{{ app_info.app_name }}</td>
+                            <td >{{ app_info.cluster_name }}</td>
+                            <td >{{ app_info.namespace }}</td>
+                            <td >{{ app_info.repo_url }}</td>
+                            <td >{{ app_info.target_revision }}</td>
+                            <td >{{ app_info.target_path }}</td>
+                            <td >{{ app_info.update_at }}</td>
+                            <td>
+                                <a href="#" onclick="showPopup2();" class="btn btn-primary" style="float:right; margin-right:15px;">
+                                    <span class="icon text-white-50">
+                                    </span>
+                                    <span class="text">배포</span>
+                                </a>
+                            </td>
+                            <td>
+                                <a href="#" onclick="showPopup3();" class="btn btn-primary" style="float:right; margin-right:15px;">
+                                    <span class="icon text-white-50">
+                                    </span>
+                                    <span class="text">배포 이력</span>
+                                </a>
+                            </td>
+                            <td>
+                                <a href="#" onclick="showPopup4();" class="btn btn-primary" style="float:right; margin-right:15px;">
+                                    <span class="icon text-white-50">
+                                    </span>
+                                    <span class="text">수정</span>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /.container-fluid -->
+{% endblock %}
