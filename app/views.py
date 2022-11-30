@@ -12,11 +12,13 @@ def app_list(request):
 
 
 @login_required
-def cluster_new(request):
+def new_cluster(request):
     if request.method == "POST":
         form = ClusterForm(request.POST, request.FILES)
         if form.is_valid():
-            cluster = form.save(commit=True)
+            cluster = form.save(commit=False)
+            file_content = cluster.kubeconfig.read().decode("utf-8")
+            print(file_content)
             return redirect("/")
     else:
         form = ClusterForm()
@@ -25,11 +27,11 @@ def cluster_new(request):
 
 
 @login_required
-def cluster_new(request):
+def new_app(request):
     if request.method == "POST":
         form = AppInfoForm(request.POST, request.FILES)
         if form.is_valid():
-            cluster = form.save(commit=True)
+            appinfo = form.save(commit=False)
             return redirect("/")
     else:
         form = AppInfoForm()

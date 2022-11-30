@@ -1,8 +1,8 @@
 from django.urls import path
-from .views import app_list, cluster_new
+from .views import new_cluster, new_app, app_list
 
 urlpatterns = [
-    path("cluster_add", cluster_new, name="cluster_add"),
-    path("app_add", cluster_new, name="cluster_add"),
+    path("new_cluster", new_cluster, name="new_cluster"),
+    path("new_app", new_app, name="new_app"),
     path("", app_list, name="app_list"),
 ]
