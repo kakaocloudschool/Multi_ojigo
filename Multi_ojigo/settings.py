@@ -11,8 +11,9 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 import os
 from pathlib import Path
-
 from django.urls import reverse_lazy
+import pymysql
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -85,12 +86,26 @@ WSGI_APPLICATION = "Multi_ojigo.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+if DEBUG:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
     }
-}
+else:
+    pymysql.install_as_MySQLdb()
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.mysql",
+            "NAME": "argocd",
+            "USER": "root",
+            "PASSWORD": "test123",
+            "HOST": "127.0.0.1",
+            "PORT": "3306",
+            "OPTIONS": {"init_command": 'SET sql_mode="STRICT_TRANS_TABLES"'},
+        }
+    }
 
 
 # Password validation
@@ -140,3 +155,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+ARGOCD_URL = "https://192.168.50.104/"
+ARGOCD_USERNAME = "admin"
+ARGO_PASSWORD = "hHGfeDCRrCJ2pXCP"
