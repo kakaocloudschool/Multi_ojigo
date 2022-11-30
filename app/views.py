@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
-from .forms import ClusterForm
+from .forms import ClusterForm, AppInfoForm
 from .models import AppInfo
 
 # Create your views here.
@@ -20,5 +20,18 @@ def cluster_new(request):
             return redirect("/")
     else:
         form = ClusterForm()
+
+    return render(request, "app/cluster_add.html", {"form": form})
+
+
+@login_required
+def cluster_new(request):
+    if request.method == "POST":
+        form = AppInfoForm(request.POST, request.FILES)
+        if form.is_valid():
+            cluster = form.save(commit=True)
+            return redirect("/")
+    else:
+        form = AppInfoForm()
 
     return render(request, "app/cluster_add.html", {"form": form})
