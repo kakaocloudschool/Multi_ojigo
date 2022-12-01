@@ -120,23 +120,20 @@ def delete_app(request, pk):
 # push
 @login_required
 def deploy_app(request, pk):
-    if request.method == "POST":
-        form = DeployForm(request.POST)  # form 정보 가져옴
-        if form.is_valid():
-            deploy = AppDeployHistory()  # model 정보 가져옴
-            appinfo = AppInfo()
-            deploy.app_name = appinfo.cluster_name
-            deploy.revision = appinfo.kubeconfig
-            deploy.deploy_type = form.cleaned_data["deploy_type"]
-            deploy.user = request.user.id
-            deploy.manager_user = request.user.id
-            deploy = form.save(commit=False)  # DB에 바로 저장하지 않고 form으로 작업하기 위해 임시로 저장
-            deploy.save()
-            return redirect("/")
-    else:
-        form = DeployForm()
+    appinfo = get_object_or_404(AppInfo, pk=pk)
+    form = DeployForm(request.POST)  # form 정보 가져옴
+    if form.is_valid():
+        deploy = AppDeployHistory()  # model 정보 가져옴
+        deploy.app_name = appinfo.app_name
+        deploy.revision = appinfo.target_revision
+        deploy.deploy_type = form.cleaned_data["deploy_type"]
+        deploy.user = request.user.id
+        deploy.manager_user = request.user.id
+        deploy = form.save(commit=False)  # DB에 바로 저장하지 않고 form으로 작업하기 위해 임시로 저장
+        deploy.save()
+        return redirect("/")
 
-    return render(request, "app/cluster_add.html", {"form": form})
+    return render(request, "app/write_form.html", {"form": form})
 
 
 @login_required
