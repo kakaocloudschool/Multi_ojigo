@@ -5,7 +5,6 @@ from django.contrib import messages
 from api_utils.argocd_apis import (
     chk_and_register_cluster,
     del_argocd_cluster,
-    create_argocd_app,
     create_argocd_app_check,
 )
 from .forms import ClusterForm, AppInfoForm
@@ -80,6 +79,7 @@ def new_app(request):
                 appinfo.update_user = request.user.id
                 appinfo.insert_user = request.user.id
                 appinfo.save()
+                messages.success(request, f"{appinfo.app_name} 앱 생성 성공.")
                 return redirect(".")
     else:
         form = AppInfoForm()
@@ -114,7 +114,7 @@ def update_app(request, pk):
     # redirect to /
     if form.is_valid():
         form.save()
-        return HttpResponseRedirect("/" )
+        return HttpResponseRedirect("/")
 
     # add form dictionary to context
     context["form"] = form

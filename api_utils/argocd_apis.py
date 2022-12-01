@@ -113,10 +113,13 @@ def create_argocd_app(
                 "targetRevision": target_revision,
                 "path": target_path,
             },
-            "destination": {"server": cluster_url, "namespace": namespace},
+            "destination": {"server": cluster_url[:-1], "namespace": namespace},
         },
     }
     resp = requests.post(url, headers=headers, data=json.dumps(data), verify=False)
+    if resp.status_code != 200:
+        return -1, "앱 등록 정보가 불일치 하거나, 이미 등록된 정보 입니다."
+    return 1, "앱 등록이 완료 되었습니다."
 
 
 def chk_and_register_cluster(cluster):
@@ -171,3 +174,43 @@ def del_argocd_cluster(cluster_url):
         return True
     else:
         return False
+
+
+def create_argocd_app_check(
+    cluster_url,
+    cluster_token,
+    auto_create_ns,
+    app_name,
+    namespace,
+    repo_url,
+    target_revision,
+    target_path,
+):
+    resp = get_argocd_token(ARGOCD_URL, ARGOCD_USERNAME, ARGO_PASSWORD)
+    if resp.status_code != 200:
+        return -1, "배포 서버의 토큰 발급에 실패하였습니다."
+    argo_bearer_token = resp.json()["token"]
+
+    if auto_create_ns:
+        return create_argocd_app_with_auto_create_namespace(
+            argocd_url=ARGOCD_URL,
+            argo_bearer_token=argo_bearer_token,
+            app_name=app_name,
+            namespace=namespace,
+            repo_url=repo_url,
+            target_revision=target_revision,
+            target_path=target_path,
+            cluster_url=cluster_url,
+            cluster_token=cluster_token,
+        )
+    else:
+        return create_argocd_app(
+            argocd_url=ARGOCD_URL,
+            argo_bearer_token=argo_bearer_token,
+            app_name=app_name,
+            namespace=namespace,
+            repo_url=repo_url,
+            target_path=target_path,
+            target_revision=target_revision,
+            cluster_url=cluster_url,
+        )
