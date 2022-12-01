@@ -134,7 +134,7 @@ def deploy_app(request, pk):
         deploy.save()
         return redirect("/")
 
-    return render(request, "app/write_form.html", {"form": form})
+    return render(request, "app/app_deploy.html", {"form": form})
 
 # !!
 @login_required

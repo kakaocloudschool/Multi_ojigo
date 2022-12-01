@@ -30,3 +30,7 @@ class DeployForm(forms.ModelForm):
         fields = [
             "deploy_type",
         ]
+        widgets = {
+            #'deploy_type': forms.RadioSelect,
+            'deploy_type': forms.Select,
+        }

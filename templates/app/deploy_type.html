@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+{% block content %}
+
+{% load static %}
+
+    <!-- Page Wrapper -->
+    <div id="wrapper">
+
+        <!-- hello -->
+
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column">
+
+            <!-- Main Content -->
+            <div id="content">
+
+                <!-- Begin Page Content -->
+                <div class="container-fluid"><br/>
+
+                    <!-- Page Heading -->
+                    <h1 class="h3 mb-2 text-gray-800">새로운 APP 생성</h1>
+                    
+
+                    <!-- DataTales Example -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Create APP</h6>
+                        </div>
+                        <div class="card-body">
+
+                            <form action="{% url 'appcreate' %}" method="POST" id='form'>
+                                {% csrf_token %}
+                                
+                                <div class="mb-4 " >
+                                    <p style="width: 160px; float:left; margin-right: 10px;">APP 이름 : </p>
+                                    <input type="text" class="form-control form-control-user" style="width:150px;" id="appname"
+                                        placeholder="app_name" name="appname" value="">
+                                </div>
+
+
+
+                                <!--radiobutton-->
+                                <fieldset>
+                                    {% for choice in question.choice_set.all %}
+                                    <div class="custom-control custom-checkbox small">
+                                        <input type="radio" class="custom-control-input" id="rolling" name="distradio" data-value="rollingupdate" checked="checked"/>
+                                        <label class="custom-control-label" for="rolling">RollingUpdate</label>
+                                    </div>
+                                    <div class="custom-control custom-checkbox small">
+                                        <input type="radio" class="custom-control-input" id="bluegreen" name="distradio" data-value="bluegreen" />
+                                        <label class="custom-control-label" for="bluegreen">BlueGreen</label>
+                                    </div>
+                                    <div class="custom-control custom-checkbox small" >
+                                        <input type="radio" class="custom-control-input" id="canary" name="distradio" data-value="canary" />
+                                        <label class="custom-control-label" for="canary">Canary</label>
+                                    </div>
+                                    {% endfor %}
+
+                                </fieldset>
+
+
+                                <div class="mb-4" >
+                                
+                                    <p style="width: 160px; float:left; margin-right: 10px;">Namespace 생성유무 </p>
+                                    <fieldset>
+                                        <div class="custom-control custom-checkbox small" style="float:left; margin-right: 10px;">
+                                            <input type="checkbox" class="custom-control-input" id="namespacetrue" name="typecheck" />
+                                            <label class="custom-control-label" for="namespacetrue"></label>
+                                        </div>
+
+                                    </fieldset>
+
+                                </div>
+
+                                <div class="mb-4" >
+                                    <p style="width: 160px; float:left; margin-right: 10px;">Namespace 명 : </p>
+                                    <input type="text" class="form-control form-control-user" style="width:150px;" id="namespace"
+                                        placeholder="namespace" name="namespace" value="">
+                                </div>
+
+                                
+                                <div class="mb-4" >
+                                    <p style="width: 160px; float:left; margin-right: 10px;">GITHUB 주소 : </p>
+                                    <input type="text" class="form-control form-control-user" style="width:150px;" id="repourl"
+                                        placeholder="repoURL" name="repourl" value="">
+                                </div>
+                                <div class="mb-4 " >
+                                    <p style="width: 160px; float:left; margin-right: 10px;">Target Branch : </p>
+                                    <input type="text" class="form-control form-control-user" style="width:150px;" id="targetrevision"
+                                        placeholder="targetRevision" name="targetrevision" value="">
+                                </div>
+                                
+                                <div class="mb-4" >
+                                    <p style="width: 160px; float:left; margin-right: 10px;">GITHUB Manifest Path : </p>
+                                    <input type="text" class="form-control form-control-user" style="width:150px;" id="targetpath"
+                                        placeholder="path" name="targetpath" value="">
+                                </div>
+
+
+                                
+
+                               
+                                </hr>
+                                <a href="#" class="btn btn-primary" style="float:right; margin-right:15px;" type="reset" onclick='return chk_form(); self.close();'>
+                                    <span class="icon text-white-50">
+                                    </span>
+                                    <span class="text">생성</span> 
+                                </a>
+                                
+                            </form>
+
+
+
+
+                        
+                            
+                        </div>
+                    </div>
+
+                </div>
+                <!-- /.container-fluid -->
+
+            </div>
+            <!-- End of Main Content -->
+            <!--test-->
+            <!-- Footer -->
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                        <span>OJeomMwo</span>                    
+                    </div>
+                </div>
+            </footer>
+            <!-- End of Footer -->
+
+        </div>
+        <!-- End of Content Wrapper -->
+
+    </div>
+    <!-- End of Page Wrapper -->
+
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fas fa-angle-up"></i>
+    </a>
+
+    <!-- Logout Modal-->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                    <a class="btn btn-primary" href="{% url 'login' %}">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        function chk_form() {
+        if(document.getElementById("appname").value==''){
+            alert("생성할 APP 이름을 입력해주십시오.");
+            return false;
+        }
+
+        if(document.getElementById("namespace").value==''){
+            alert("Namespace를 입력해주십시오.");
+            return false;
+        }
+        if (document.getElementById("repourl").value=='') {
+            alert('GitHub Repository를 입력해주십시오.');
+            return false;
+        }
+        if (document.getElementById("targetrevision").value=='') {
+            alert('GitHub Branch를 입력해주십시오.');
+            return false;
+        }
+        if (document.getElementById("targetpath").value=='') {
+            alert('GitHub Manifest를 입력해주십시오.');
+            return false;
+        }
+        document.getElementById('form').submit();
+        }
+    </script>
+    <script>
+        function changeBtnAWS()  {
+            const btnElement = document.getElementById('dropdownMenuButton');
+            const clustername = document.getElementById('aws').getAttribute('data-value');
+            btnElement.innerText = clustername;
+        }
+        function changeBtnGCP()  {
+            const btnElement = document.getElementById('dropdownMenuButton');
+            const clustername = document.getElementById('gcp').getAttribute('data-value');
+            btnElement.innerText = clustername;
+        }
+    </script>
+
+
+
+{% endblock %}
