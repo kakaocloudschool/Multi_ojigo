@@ -6,7 +6,7 @@
         <form action="" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             {% bootstrap_form form %}
-                <button class="btn btn-primary">저장</button>
+                <button class="btn btn-primary" type="submit" onclick="location.href='/edit/{{AppInfo.pk}}/'">저장</button>
         </form>
     </div>
 {% endblock %}

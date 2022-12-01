@@ -37,21 +37,21 @@
                             <td >{{ app_info.target_path }}</td>
                             <td >{{ app_info.update_at }}</td>
                             <td>
-                                <a href="{% url appinfo_update %}" class="btn btn-primary" style="float:right; margin-right:15px;">
+                                <a href="{% url 'appinfo_update' app_info.app_name %}" class="btn btn-primary" style="float:right; margin-right:15px;">
                                     <span class="icon text-white-50">
                                     </span>
                                     <span class="text">수정</span>
                                 </a>
                             </td>
                             <td>
-                                <a href="{% url appinfo_deploy %}" class="btn btn-primary" style="float:right; margin-right:15px;">
+                                <a href="{% url 'appinfo_deploy' %}" class="btn btn-primary" style="float:right; margin-right:15px;">
                                     <span class="icon text-white-50">
                                     </span>
                                     <span class="text">배포</span>
                                 </a>
                             </td>
                             <td>
-                                <a href="{% url appinfo_history %}" class="btn btn-primary" style="float:right; margin-right:15px;">
+                                <a href="{% url 'appinfo_history' %}" class="btn btn-primary" style="float:right; margin-right:15px;">
                                     <span class="icon text-white-50">
                                     </span>
                                     <span class="text">배포 이력</span>

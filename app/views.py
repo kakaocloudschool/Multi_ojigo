@@ -113,9 +113,10 @@ def new_app(request):
 
 @login_required
 def update_app(request, pk):
-    appinfo = AppInfo.object.get(id=pk)  # model 정보 가져옴
+    appinfo = AppInfo.objects.filter(pk=pk)  # model 정보 가져옴
+    # print(pk)
     if request.method == "POST":
-
+        form = AppInfoForm(request.POST)  # form 정보 가져옴
         appinfo.app_name = request.POST['app_name']
         appinfo.cluster_name = request.POST['cluster_name']
         appinfo.auto_create_ns = request.POST['auto_create_ns']
@@ -124,7 +125,6 @@ def update_app(request, pk):
         appinfo.target_revision = request.POST['target_revision']
         appinfo.target_path = request.POST['target_path']
 
-        form = AppInfoForm(request.POST)  # form 정보 가져옴
         if form.is_valid():
 
             appinfo.app_name = form.cleaned_data["app_name"]
@@ -140,7 +140,7 @@ def update_app(request, pk):
     else:
         form = AppInfoForm()
 
-    return render(request, "app/cluster_add.html", {"form": form})
+    return render(request, "app/appinfo_update.html", {"form": form})
 
 
 @login_required
