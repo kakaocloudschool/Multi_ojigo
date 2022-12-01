@@ -43,40 +43,36 @@
                                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                                     <thead>
                                         <tr>
-                                            <th>cluster명</th>
-                                            <th>이미지</th>
-                                            <th>태그</th>
-                                            <th>manifest</th>
-                                            <th>GIT_URL</th>
-                                            <th>생성자</th>
-                                            <th>생성 시간</th>
-                                            <th>수정자</th>
-                                            <th>수정 시간</th>
-
-
+                                            <th>배포 앱</th>
+                                            <th>GitHub 브런치</th>
+                                            <th>배포 방식</th>
+                                            <th>배포자</th>
+                                            <th>승인자</th>
+                                            <th>배포 시간</th>
                                         </tr>
                                     </thead>
                                     <tbody>
+                                    {% for history in deploy_history %}
                                         <tr>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                        </tr>
-                                        <tr>
+                                            <td>{{ history.app_name }}</td>
+                                            <td>{{ history.revision }}</td>
+                                            <td>{{ history.deploy_type }}</td>
+                                            <td>{{ history.user }}</td>
+                                            <td>{{ history.manager_user }}</td>
+                                            <td>{{ history.insert_at }}</td>
 
                                         </tr>
-                                        <tr>
-
-                                        </tr>
-
+                                    {% endfor %}
                                     </tbody>
                                 </table>
+
+                            </div>
+                            <div class="my-2">
+                                <a href="{% url 'app_list' %}" class="btn btn-primary" style="float:right; margin-right:15px;">
+                                    <span class="icon text-white-50">
+                                    </span>
+                                    <span class="text">돌아가기</span>
+                                </a>
                             </div>
                         </div>
                     </div>

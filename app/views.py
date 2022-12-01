@@ -139,5 +139,5 @@ def deploy_app(request, pk):
 # !!
 @login_required
 def history_app(request):
-    qs = AppInfo.objects.all()
-    return render(request, "app/appinfo_history.html", {"appinfo_list": qs})
+    qs = AppDeployHistory.objects.all()
+    return render(request, "app/deploy_history.html", {"deploy_history": qs})
