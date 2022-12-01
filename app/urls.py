@@ -18,6 +18,6 @@ urlpatterns = [
     path("del_cluster/<slug:slug>", del_cluster, name="del_cluster"),
     path("", app_list, name="app_list"),
     path("appinfo_update/<str:pk>", update_app, name="appinfo_update"),
-    path("appinfo_deploy", deploy_app, name="appinfo_deploy"),
+    path("appinfo_deploy/<str:pk>", deploy_app, name="appinfo_deploy"),
     path("appinfo_history", history_app, name="appinfo_history"),
 ]

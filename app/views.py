@@ -119,10 +119,17 @@ def update_app(request, pk):
 
 
 @login_required
-def deploy_app(request):
+def deploy_app(request, pk):
     if request.method == "POST":
         form = DeployForm(request.POST)  # form 정보 가져옴
         if form.is_valid():
+            deploy = AppDeployHistory()  # model 정보 가져옴
+            appinfo = AppInfo()
+            deploy.app_name = appinfo.cluster_name
+            deploy.revision = appinfo.kubeconfig
+            deploy.deploy_type = form.cleaned_data["deploy_type"]
+            deploy.user = request.user.id
+            deploy.manager_user = request.user.id
             deploy = form.save(commit=False)  # DB에 바로 저장하지 않고 form으로 작업하기 위해 임시로 저장
             deploy.save()
             return redirect("/")
