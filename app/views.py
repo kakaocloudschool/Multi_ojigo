@@ -136,7 +136,7 @@ def deploy_app(request, pk):
 
     return render(request, "app/write_form.html", {"form": form})
 
-
+# !!
 @login_required
 def history_app(request):
     qs = AppInfo.objects.all()
