@@ -6,6 +6,7 @@ from api_utils.argocd_apis import (
     chk_and_register_cluster,
     del_argocd_cluster,
     create_argocd_app_check,
+    del_argocd_app,
 )
 from .forms import ClusterForm, AppInfoForm
 from .models import AppInfo, Cluster
@@ -93,32 +94,20 @@ def del_cluster(request, slug):
         cluster.delete()
     else:
         messages.error(request, "cluster 삭제 실패")
-    return redirect("/cluster_list")
+    return redirect("cluster_list")
 
 
 # push
 @login_required
-def update_app(request, pk):
-    # dictionary for initial data with
-    # field names as keys
+def delete_app(request, pk):
     context = {}
-
-    # fetch the object related to passed id
-    obj = get_object_or_404(AppInfo, pk=pk)
-
-    # pass the object as instance in form
-    form = AppInfoForm(request.POST or None, instance=obj)
-
-    # save the data from the form and
-    # redirect to /
-    if form.is_valid():
-        form.save()
-        return redirect("/")
-
-    # add form dictionary to context
-    context["form"] = form
-
-    return render(request, "app/write_form.html", context)
+    appinfo = get_object_or_404(AppInfo, pk=pk)
+    if del_argocd_app(appinfo.app_name):
+        messages.success(request, f"{appinfo.app_name} 앱 삭제 완료")
+        appinfo.delete()
+    else:
+        messages.error(request, f"{appinfo.app_name} 앱 삭제 실패")
+    return redirect("app_list")
 
 
 @login_required

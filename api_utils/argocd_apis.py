@@ -161,15 +161,26 @@ def del_argocd_cluster(cluster_url):
     resp = get_argocd_token(ARGOCD_URL, ARGOCD_USERNAME, ARGO_PASSWORD)
     argo_bearer_token = resp.json()["token"]
     url = ARGOCD_URL + "api/v1/clusters/" + cluster_url
-    print(url)
-    print(argo_bearer_token)
 
     headers = CaseInsensitiveDict()
     headers["Accept"] = "application/json"
     headers["Authorization"] = f"Bearer {argo_bearer_token}"
 
     resp = requests.delete(url, headers=headers, verify=False)
-    print(resp.text)
+    if resp.status_code == 200:
+        return True
+    else:
+        return False
+
+
+def del_argocd_app(app_name):
+    resp = get_argocd_token(ARGOCD_URL, ARGOCD_USERNAME, ARGO_PASSWORD)
+    argo_bearer_token = resp.json()["token"]
+    url = ARGOCD_URL + "api/v1/applications/" + app_name
+    headers = CaseInsensitiveDict()
+    headers["Accept"] = "application/json"
+    headers["Authorization"] = f"Bearer {argo_bearer_token}"
+    resp = requests.delete(url, headers=headers, verify=False)
     if resp.status_code == 200:
         return True
     else:
