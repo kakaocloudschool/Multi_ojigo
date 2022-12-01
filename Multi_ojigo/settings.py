@@ -15,13 +15,13 @@ from django.urls import reverse_lazy
 import pymysql
 from django.contrib.messages import constants as messages_constants
 
-MESSAGE_LEVEL = messages_constants.INFO  # 디폴트 설정
+MESSAGE_LEVEL = messages_constants.INFO # 디폴트 설정
 
 MESSAGE_LEVEL = messages_constants.DEBUG
 
 MESSAGE_TAGS = {
-    messages_constants.DEBUG: "secondary",
-    messages_constants.ERROR: "danger",
+messages_constants.DEBUG: 'secondary',
+messages_constants.ERROR: 'danger',
 }
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -110,7 +110,7 @@ else:
             "NAME": "argocd",
             "USER": "root",
             "PASSWORD": "test123",
-            "HOST": "192.168.50.106",
+            "HOST": "127.0.0.1",
             "PORT": "3306",
             "OPTIONS": {"init_command": 'SET sql_mode="STRICT_TRANS_TABLES"'},
         }

@@ -6,6 +6,8 @@ from django.conf import settings
 from api_utils.argocd_apis import (
     chk_and_register_cluster,
     del_argocd_cluster,
+    create_argocd_app_check,
+    del_argocd_app,
 )
 from api_utils.kubernetes_apis import parsing_kube_confing
 from .forms import ClusterForm, AppInfoForm, DeployForm
@@ -45,11 +47,11 @@ def new_cluster(request):
             else:
                 messages.success(request, "클러스터 생성 성공.")
                 cluster.save()
-                return redirect("/")
+                return redirect("cluster_list")
     else:
         form = ClusterForm()
 
-    return render(request, "app/cluster_add.html", {"form": form})
+    return render(request, "app/write_form.html", {"form": form})
 
 
 @login_required
@@ -57,7 +59,7 @@ def new_app(request):
     if request.method == "POST":
         form = AppInfoForm(request.POST)  # form 정보 가져옴
         if form.is_valid():
-            appinfo = AppInfo()  # model 정보 가져옴
+            appinfo = AppInfo()
             appinfo.app_name = form.cleaned_data["app_name"]
             appinfo.cluster_name = form.cleaned_data["cluster_name"]
             appinfo.auto_create_ns = form.cleaned_data["auto_create_ns"]
@@ -65,13 +67,31 @@ def new_app(request):
             appinfo.repo_url = form.cleaned_data["repo_url"]
             appinfo.target_revision = form.cleaned_data["target_revision"]
             appinfo.target_path = form.cleaned_data["target_path"]
-            appinfo = form.save(commit=False)  # DB에 바로 저장하지 않고 form으로 작업하기 위해 임시로 저장
-            appinfo.save()
-            return redirect("/")
+            cluster = Cluster.objects.get(cluster_name=appinfo.cluster_name)
+            cluster_url = cluster.cluster_url
+            cluster_token = cluster.bearer_token
+            result_code, msg = create_argocd_app_check(
+                cluster_url=cluster_url,
+                cluster_token=cluster_token,
+                auto_create_ns=appinfo.auto_create_ns,
+                app_name=appinfo.app_name,
+                namespace=appinfo.namespace,
+                repo_url=appinfo.repo_url,
+                target_revision=appinfo.target_revision,
+                target_path=appinfo.target_path,
+            )
+            print(result_code, msg)
+            if result_code == -1:
+                messages.error(request, msg)
+            else:
+                appinfo.update_user = request.user.id
+                appinfo.insert_user = request.user.id
+                appinfo.save()
+                messages.success(request, f"{appinfo.app_name} 앱 생성 성공.")
+                return redirect("app_list")
     else:
         form = AppInfoForm()
-
-    return render(request, "app/cluster_add.html", {"form": form})
+    return render(request, "app/write_form.html", {"form": form})
 
 
 @login_required
@@ -81,41 +101,21 @@ def del_cluster(request, slug):
         cluster.delete()
     else:
         messages.error(request, "cluster 삭제 실패")
-    return redirect("/cluster_list")
+    return redirect("cluster_list")
 
 
 # push
 
 @login_required
-def update_app(request, pk):
-    appinfo = AppInfo.objects.filter(pk=pk)  # model 정보 가져옴
-    # print(pk)
-    if request.method == "POST":
-        form = AppInfoForm(request.POST)  # form 정보 가져옴
-        appinfo.app_name = request.POST["app_name"]
-        appinfo.cluster_name = request.POST["cluster_name"]
-        appinfo.auto_create_ns = request.POST["auto_create_ns"]
-        appinfo.namespace = request.POST["namespace"]
-        appinfo.repo_url = request.POST["repo_url"]
-        appinfo.target_revision = request.POST["target_revision"]
-        appinfo.target_path = request.POST["target_path"]
-
-        if form.is_valid():
-
-            appinfo.app_name = form.cleaned_data["app_name"]
-            appinfo.cluster_name = form.cleaned_data["cluster_name"]
-            appinfo.auto_create_ns = form.cleaned_data["auto_create_ns"]
-            appinfo.namespace = form.cleaned_data["namespace"]
-            appinfo.repo_url = form.cleaned_data["repo_url"]
-            appinfo.target_revision = form.cleaned_data["target_revision"]
-            appinfo.target_path = form.cleaned_data["target_path"]
-            appinfo = form.save(commit=False)  # DB에 바로 저장하지 않고 form으로 작업하기 위해 임시로 저장
-            appinfo.save()
-            return redirect("/")
+def delete_app(request, pk):
+    context = {}
+    appinfo = get_object_or_404(AppInfo, pk=pk)
+    if del_argocd_app(appinfo.app_name):
+        messages.success(request, f"{appinfo.app_name} 앱 삭제 완료")
+        appinfo.delete()
     else:
-        form = AppInfoForm()
-
-    return render(request, "app/appinfo_update.html", {"form": form})
+        messages.error(request, f"{appinfo.app_name} 앱 삭제 실패")
+    return redirect("app_list")
 
 
 @login_required

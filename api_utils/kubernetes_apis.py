@@ -17,8 +17,8 @@ def parsing_kube_confing(file_content):
 
 
 def is_have_namespace(cluster_url: str, cluster_token: str, namespace: str) -> bool:
-    url = cluster_url + "/api/v1/namespaces/" + namespace
-
+    url = cluster_url + "api/v1/namespaces/" + namespace
+    print(url)
     headers = CaseInsensitiveDict()
     headers["Accept"] = "application/json"
     headers["Authorization"] = f"Bearer {cluster_token}"
@@ -34,7 +34,7 @@ def is_have_namespace(cluster_url: str, cluster_token: str, namespace: str) -> b
 
 
 def create_namespace_in_cluster(cluster_url: str, cluster_token: str, namespace: str):
-    url = cluster_url + "/api/v1/namespaces/"
+    url = cluster_url + "api/v1/namespaces/"
 
     headers = CaseInsensitiveDict()
     headers["Accept"] = "application/json"
