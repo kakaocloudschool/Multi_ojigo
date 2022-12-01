@@ -92,11 +92,22 @@ def new_cluster(request):
 @login_required
 def new_app(request):
     if request.method == "POST":
-        form = AppInfoForm(request.POST, request.FILES)
+        form = AppInfoForm(request.POST)  # form 정보 가져옴
         if form.is_valid():
-            appinfo = form.save(commit=False)
+            appinfo = AppInfo()  # model 정보 가져옴
+            appinfo.app_name = form.cleaned_data["app_name"]
+            appinfo.cluster_name = form.cleaned_data["cluster_name"]
+            appinfo.auto_create_ns = form.cleaned_data["auto_create_ns"]
+            appinfo.namespace = form.cleaned_data["namespace"]
+            appinfo.repo_url = form.cleaned_data["repo_url"]
+            appinfo.target_revision = form.cleaned_data["target_revision"]
+            appinfo.target_path = form.cleaned_data["target_path"]
+            appinfo = form.save(commit=False)  # DB에 바로 저장하지 않고 form으로 작업하기 위해 임시로 저장
+            appinfo.save()
             return redirect("/")
     else:
         form = AppInfoForm()
 
     return render(request, "app/cluster_add.html", {"form": form})
+
+
