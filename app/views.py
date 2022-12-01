@@ -122,9 +122,10 @@ def delete_app(request, pk):
 def deploy_app(request, pk):
     appinfo = get_object_or_404(AppInfo, pk=pk)
     form = DeployForm(request.POST)  # form 정보 가져옴
+
     if form.is_valid():
         deploy = AppDeployHistory()  # model 정보 가져옴
-        deploy.app_name = appinfo.app_name
+        deploy.app_name = appinfo
         deploy.revision = appinfo.target_revision
         deploy.deploy_type = form.cleaned_data["deploy_type"]
         deploy.user = request.user.id
