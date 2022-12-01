@@ -1,5 +1,5 @@
 from django import forms
-from .models import AppInfo, Cluster
+from .models import AppInfo, Cluster, AppDeployHistory
 
 
 class AppInfoForm(forms.ModelForm):
@@ -16,3 +16,8 @@ class ClusterForm(forms.ModelForm):
     #     self.fields['cluster_name'].label = '클러스터 이름'
     #     self.fields['bearer_token'].label = '토큰 값 입력'
     #     self.fields['kubeconfig'].label = 'config 파일 업로드'
+
+class DeployForm(forms.ModelForm):
+    class Meta:
+        model = AppDeployHistory
+        fields = ["deploy_type"]

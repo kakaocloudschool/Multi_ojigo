@@ -9,8 +9,8 @@ from api_utils.argocd_apis import (
     get_argocd_token,
 )
 from api_utils.kubernetes_apis import parsing_kube_confing
-from .forms import ClusterForm, AppInfoForm
-from .models import AppInfo, Cluster
+from .forms import ClusterForm, AppInfoForm, DeployForm
+from .models import AppInfo, Cluster, AppDeployHistory
 
 ARGOCD_URL = getattr(settings, "ARGOCD_URL", None)
 ARGOCD_USERNAME = getattr(settings, "ARGOCD_USERNAME", None)
@@ -94,14 +94,6 @@ def new_app(request):
     if request.method == "POST":
         form = AppInfoForm(request.POST)  # form 정보 가져옴
         if form.is_valid():
-            appinfo = AppInfo()  # model 정보 가져옴
-            appinfo.app_name = form.cleaned_data["app_name"]
-            appinfo.cluster_name = form.cleaned_data["cluster_name"]
-            appinfo.auto_create_ns = form.cleaned_data["auto_create_ns"]
-            appinfo.namespace = form.cleaned_data["namespace"]
-            appinfo.repo_url = form.cleaned_data["repo_url"]
-            appinfo.target_revision = form.cleaned_data["target_revision"]
-            appinfo.target_path = form.cleaned_data["target_path"]
             appinfo = form.save(commit=False)  # DB에 바로 저장하지 않고 form으로 작업하기 위해 임시로 저장
             appinfo.save()
             return redirect("/")
@@ -146,23 +138,15 @@ def update_app(request, pk):
 @login_required
 def deploy_app(request):
     if request.method == "POST":
-        form = AppInfoForm(request.POST)  # form 정보 가져옴
+        form = DeployForm(request.POST)  # form 정보 가져옴
         if form.is_valid():
-            appinfo = AppInfo()  # model 정보 가져옴
-            appinfo.app_name = form.cleaned_data["app_name"]
-            appinfo.cluster_name = form.cleaned_data["cluster_name"]
-            appinfo.auto_create_ns = form.cleaned_data["auto_create_ns"]
-            appinfo.namespace = form.cleaned_data["namespace"]
-            appinfo.repo_url = form.cleaned_data["repo_url"]
-            appinfo.target_revision = form.cleaned_data["target_revision"]
-            appinfo.target_path = form.cleaned_data["target_path"]
-            appinfo = form.save(commit=False)  # DB에 바로 저장하지 않고 form으로 작업하기 위해 임시로 저장
-            appinfo.save()
+            deploy = form.save(commit=False)  # DB에 바로 저장하지 않고 form으로 작업하기 위해 임시로 저장
+            deploy.save()
             return redirect("/")
     else:
-        form = AppInfoForm()
+        form = DeployForm()
 
-    return render(request, "app/appinfo_deploy.html", {"form": form})
+    return render(request, "app/cluster_add.html", {"form": form})
 
 @login_required
 def history_app(request):

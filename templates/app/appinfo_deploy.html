@@ -41,19 +41,17 @@
 
                                 <fieldset>
                                     <div class="custom-control custom-checkbox small">
-                                        <input type="radio" class="custom-control-input" id="rolling" name="distradio" data-value="rollingupdate" checked="checked"/>
+                                        <input type="radio" class="custom-control-input" id="rolling" name="distradio" value="rollingupdate" checked="checked"/>
                                         <label class="custom-control-label" for="rolling">RollingUpdate</label>
                                     </div>
                                     <div class="custom-control custom-checkbox small">
-                                        <input type="radio" class="custom-control-input" id="bluegreen" name="distradio" data-value="bluegreen" />
+                                        <input type="radio" class="custom-control-input" id="bluegreen" name="distradio" value="bluegreen" />
                                         <label class="custom-control-label" for="bluegreen">BlueGreen</label>
                                     </div>
                                     <div class="custom-control custom-checkbox small" >
-                                        <input type="radio" class="custom-control-input" id="canary" name="distradio" data-value="canary" />
+                                        <input type="radio" class="custom-control-input" id="canary" name="distradio" value="canary" />
                                         <label class="custom-control-label" for="canary">Canary</label>
                                     </div>
-
-
                                 </fieldset>
 
 
@@ -91,37 +89,6 @@
     <a class="scroll-to-top rounded" href="#page-top">
         <i class="fas fa-angle-up"></i>
     </a>
-
-
-    <script>
-        function changeBtnName1()  {
-            const btnElement = document.getElementById('btn1');
-            const nsElement = document.getElementById('apins').getAttribute('data-value');
-            btnElement.innerText = nsElement;
-        }
-        function changeBtnName2()  {
-            const btnElement = document.getElementById('btn2');
-            const ctnElement = document.getElementById('apictn').getAttribute('data-value');
-            console.log(ctnElement)
-            btnElement.innerText = ctnElement;
-        }
-        function changeBtncpu()  {
-            const btnElement = document.getElementById('dropdownMenuButton');
-            const hpaElement = document.getElementById('cpu').getAttribute('data-value');
-            btnElement.innerText = hpaElement;
-        }
-        function changeBtnram()  {
-            const btnElement = document.getElementById('dropdownMenuButton');
-            const hpaElement = document.getElementById('ram').getAttribute('data-value');
-            btnElement.innerText = hpaElement;
-        }
-        function changeBtnpromql()  {
-            const btnElement = document.getElementById('dropdownMenuButton');
-            const hpaElement = document.getElementById('promql').getAttribute('data-value');
-            btnElement.innerText = hpaElement;
-        }
-        </script>
-
 
 
 {% endblock %}
