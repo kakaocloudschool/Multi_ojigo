@@ -1,5 +1,5 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404, HttpResponseRedirect
 from django.contrib import messages
 from django.conf import settings
 
@@ -94,53 +94,38 @@ def new_app(request):
     if request.method == "POST":
         form = AppInfoForm(request.POST)  # form 정보 가져옴
         if form.is_valid():
-            appinfo = AppInfo()  # model 정보 가져옴
-            appinfo.app_name = form.cleaned_data["app_name"]
-            appinfo.cluster_name = form.cleaned_data["cluster_name"]
-            appinfo.auto_create_ns = form.cleaned_data["auto_create_ns"]
-            appinfo.namespace = form.cleaned_data["namespace"]
-            appinfo.repo_url = form.cleaned_data["repo_url"]
-            appinfo.target_revision = form.cleaned_data["target_revision"]
-            appinfo.target_path = form.cleaned_data["target_path"]
             appinfo = form.save(commit=False)  # DB에 바로 저장하지 않고 form으로 작업하기 위해 임시로 저장
             appinfo.save()
             return redirect("/")
     else:
         form = AppInfoForm()
 
-    return render(request, "app/cluster_add.html", {"form": form})
-# push
+    return render(request, "app/app_add.html", {"form": form})
+
+
 
 @login_required
 def update_app(request, pk):
-    appinfo = AppInfo.objects.filter(pk=pk)  # model 정보 가져옴
-    # print(pk)
-    if request.method == "POST":
-        form = AppInfoForm(request.POST)  # form 정보 가져옴
-        appinfo.app_name = request.POST['app_name']
-        appinfo.cluster_name = request.POST['cluster_name']
-        appinfo.auto_create_ns = request.POST['auto_create_ns']
-        appinfo.namespace = request.POST['namespace']
-        appinfo.repo_url = request.POST['repo_url']
-        appinfo.target_revision = request.POST['target_revision']
-        appinfo.target_path = request.POST['target_path']
+    # dictionary for initial data with
+    # field names as keys
+    context = {}
 
-        if form.is_valid():
+    # fetch the object related to passed id
+    obj = get_object_or_404(AppInfo, pk=pk)
 
-            appinfo.app_name = form.cleaned_data["app_name"]
-            appinfo.cluster_name = form.cleaned_data["cluster_name"]
-            appinfo.auto_create_ns = form.cleaned_data["auto_create_ns"]
-            appinfo.namespace = form.cleaned_data["namespace"]
-            appinfo.repo_url = form.cleaned_data["repo_url"]
-            appinfo.target_revision = form.cleaned_data["target_revision"]
-            appinfo.target_path = form.cleaned_data["target_path"]
-            appinfo = form.save(commit=False)  # DB에 바로 저장하지 않고 form으로 작업하기 위해 임시로 저장
-            appinfo.save()
-            return redirect("/")
-    else:
-        form = AppInfoForm()
+    # pass the object as instance in form
+    form = AppInfoForm(request.POST or None, instance=obj)
 
-    return render(request, "app/appinfo_update.html", {"form": form})
+    # save the data from the form and
+    # redirect to /
+    if form.is_valid():
+        form.save()
+        return HttpResponseRedirect("/" )
+
+    # add form dictionary to context
+    context["form"] = form
+
+    return render(request, "update_app.html", context)
 
 
 @login_required
