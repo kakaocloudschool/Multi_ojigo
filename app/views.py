@@ -39,11 +39,11 @@ def new_cluster(request):
             else:
                 messages.success(request, "클러스터 생성 성공.")
                 cluster.save()
-                return redirect("/")
+                return redirect("cluster_list")
     else:
         form = ClusterForm()
 
-    return render(request, "app/cluster_add.html", {"form": form})
+    return render(request, "app/write_form.html", {"form": form})
 
 
 @login_required
@@ -80,11 +80,10 @@ def new_app(request):
                 appinfo.insert_user = request.user.id
                 appinfo.save()
                 messages.success(request, f"{appinfo.app_name} 앱 생성 성공.")
-                return redirect(".")
+                return redirect("app_list")
     else:
         form = AppInfoForm()
-
-    return render(request, "app/app_add.html", {"form": form})
+    return render(request, "app/write_form.html", {"form": form})
 
 
 @login_required
@@ -114,12 +113,12 @@ def update_app(request, pk):
     # redirect to /
     if form.is_valid():
         form.save()
-        return HttpResponseRedirect("/")
+        return redirect("/")
 
     # add form dictionary to context
     context["form"] = form
 
-    return render(request, "update_app.html", context)
+    return render(request, "app/write_form.html", context)
 
 
 @login_required

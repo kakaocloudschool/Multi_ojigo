@@ -1,5 +1,13 @@
 from django.urls import path
-from .views import new_cluster, new_app, app_list, cluster_list, deploy_app, history_app, update_app
+from .views import (
+    new_cluster,
+    new_app,
+    app_list,
+    cluster_list,
+    deploy_app,
+    history_app,
+    update_app,
+)
 
 urlpatterns = [
     path("new_cluster", new_cluster, name="new_cluster"),
