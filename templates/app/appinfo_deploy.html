@@ -1,12 +1,127 @@
-{% extends "base.html" %}
-{% load django_bootstrap5 %}
-
+{% extends 'base.html' %}
 {% block content %}
-    <div class="container-fluid">
-        <form action="" method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            {% bootstrap_form form %}
-                <button class="btn btn-primary">저장</button>
-        </form>
+
+{% load static %}
+
+    <title>app distribution</title>
+
+</head>
+<!-- 수동 스케줄러-->
+<body id="page-top">
+
+    <!-- Page Wrapper -->
+    <div id="wrapper">
+
+        <!-- hello -->
+
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column">
+
+            <!-- Main Content -->
+            <div id="content">
+
+                <!-- Begin Page Content -->
+                <div class="container-fluid"><br/>
+
+                    <!-- Page Heading -->
+                    <h1 class="h3 mb-2 text-gray-800">배포 방식</h1>
+
+
+                    <!-- DataTales Example -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Deploy Method</h6>
+                        </div>
+                        <div class="card-body">
+
+                            <form >
+
+                                <!--radiobutton-->
+
+
+                                <fieldset>
+                                    <div class="custom-control custom-checkbox small">
+                                        <input type="radio" class="custom-control-input" id="rolling" name="distradio" data-value="rollingupdate" checked="checked"/>
+                                        <label class="custom-control-label" for="rolling">RollingUpdate</label>
+                                    </div>
+                                    <div class="custom-control custom-checkbox small">
+                                        <input type="radio" class="custom-control-input" id="bluegreen" name="distradio" data-value="bluegreen" />
+                                        <label class="custom-control-label" for="bluegreen">BlueGreen</label>
+                                    </div>
+                                    <div class="custom-control custom-checkbox small" >
+                                        <input type="radio" class="custom-control-input" id="canary" name="distradio" data-value="canary" />
+                                        <label class="custom-control-label" for="canary">Canary</label>
+                                    </div>
+
+
+                                </fieldset>
+
+
+                                <a href="#" class="btn btn-primary" style="float:right; margin-right:15px;">
+                                    <span class="icon text-white-50">
+                                    </span>
+                                    <span class="text">배포</span>
+                                </a>
+
+                            </form>
+
+
+
+
+
+
+                        </div>
+                    </div>
+
+                </div>
+                <!-- /.container-fluid -->
+
+            </div>
+            <!-- End of Main Content -->
+
+
+
+        </div>
+        <!-- End of Content Wrapper -->
+
     </div>
+    <!-- End of Page Wrapper -->
+
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fas fa-angle-up"></i>
+    </a>
+
+
+    <script>
+        function changeBtnName1()  {
+            const btnElement = document.getElementById('btn1');
+            const nsElement = document.getElementById('apins').getAttribute('data-value');
+            btnElement.innerText = nsElement;
+        }
+        function changeBtnName2()  {
+            const btnElement = document.getElementById('btn2');
+            const ctnElement = document.getElementById('apictn').getAttribute('data-value');
+            console.log(ctnElement)
+            btnElement.innerText = ctnElement;
+        }
+        function changeBtncpu()  {
+            const btnElement = document.getElementById('dropdownMenuButton');
+            const hpaElement = document.getElementById('cpu').getAttribute('data-value');
+            btnElement.innerText = hpaElement;
+        }
+        function changeBtnram()  {
+            const btnElement = document.getElementById('dropdownMenuButton');
+            const hpaElement = document.getElementById('ram').getAttribute('data-value');
+            btnElement.innerText = hpaElement;
+        }
+        function changeBtnpromql()  {
+            const btnElement = document.getElementById('dropdownMenuButton');
+            const hpaElement = document.getElementById('promql').getAttribute('data-value');
+            btnElement.innerText = hpaElement;
+        }
+        </script>
+
+
+
 {% endblock %}
