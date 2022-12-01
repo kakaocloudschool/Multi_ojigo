@@ -162,9 +162,9 @@ def deploy_app(request):
     else:
         form = AppInfoForm()
 
-    return render(request, "app/cluster_add.html", {"form": form})
+    return render(request, "app/appinfo_deploy.html", {"form": form})
 
 @login_required
 def history_app(request):
     qs = AppInfo.objects.all()
-    return render(request, "index.html", {"appinfo_list": qs})
+    return render(request, "app/appinfo_history.html", {"appinfo_list": qs})
