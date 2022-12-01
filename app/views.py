@@ -117,7 +117,7 @@ def delete_app(request, pk):
         messages.error(request, f"{appinfo.app_name} 앱 삭제 실패")
     return redirect("app_list")
 
-
+# push
 @login_required
 def deploy_app(request, pk):
     if request.method == "POST":
