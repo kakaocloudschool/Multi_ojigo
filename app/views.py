@@ -109,7 +109,7 @@ def new_app(request):
         form = AppInfoForm()
 
     return render(request, "app/cluster_add.html", {"form": form})
-
+# push
 
 @login_required
 def update_app(request, pk):
