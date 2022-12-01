@@ -95,26 +95,26 @@ WSGI_APPLICATION = "Multi_ojigo.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-# if DEBUG:
-#     DATABASES = {
-#         "default": {
-#             "ENGINE": "django.db.backends.sqlite3",
-#             "NAME": BASE_DIR / "db.sqlite3",
-#         }
-#     }
-# else:
-pymysql.install_as_MySQLdb()
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": "argocd",
-        "USER": "root",
-        "PASSWORD": "test123",
-        "HOST": "192.168.50.106",
-        "PORT": "3306",
-        "OPTIONS": {"init_command": 'SET sql_mode="STRICT_TRANS_TABLES"'},
+if DEBUG:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
     }
-}
+else:
+    pymysql.install_as_MySQLdb()
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.mysql",
+            "NAME": "argocd",
+            "USER": "root",
+            "PASSWORD": "test123",
+            "HOST": "192.168.50.106",
+            "PORT": "3306",
+            "OPTIONS": {"init_command": 'SET sql_mode="STRICT_TRANS_TABLES"'},
+        }
+    }
 
 
 # Password validation
