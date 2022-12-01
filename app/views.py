@@ -106,9 +106,9 @@ def del_cluster(request, slug):
 
 # push
 
+
 @login_required
 def delete_app(request, pk):
-    context = {}
     appinfo = get_object_or_404(AppInfo, pk=pk)
     if del_argocd_app(appinfo.app_name):
         messages.success(request, f"{appinfo.app_name} 앱 삭제 완료")
@@ -116,6 +116,7 @@ def delete_app(request, pk):
     else:
         messages.error(request, f"{appinfo.app_name} 앱 삭제 실패")
     return redirect("app_list")
+
 
 # push
 @login_required
@@ -130,7 +131,6 @@ def deploy_app(request, pk):
         deploy.deploy_type = form.cleaned_data["deploy_type"]
         deploy.user = request.user.id
         deploy.manager_user = request.user.id
-        deploy = form.save(commit=False)  # DB에 바로 저장하지 않고 form으로 작업하기 위해 임시로 저장
         deploy.save()
         return redirect("/")
 

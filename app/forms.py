@@ -5,7 +5,16 @@ from .models import AppInfo, Cluster, AppDeployHistory
 class AppInfoForm(forms.ModelForm):
     class Meta:
         model = AppInfo
-        fields = ["app_name", "cluster_name", "auto_create_ns", "namespace", "repo_url", "target_revision", "target_path"]
+        fields = [
+            "app_name",
+            "cluster_name",
+            "auto_create_ns",
+            "namespace",
+            "repo_url",
+            "target_revision",
+            "target_path",
+        ]
+
 
 
 
@@ -18,4 +27,6 @@ class ClusterForm(forms.ModelForm):
 class DeployForm(forms.ModelForm):
     class Meta:
         model = AppDeployHistory
-        fields = ["deploy_type"]
+        fields = [
+            "deploy_type",
+        ]

@@ -32,14 +32,17 @@ class AppInfo(models.Model):
     update_user = models.CharField(max_length=100)
     update_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return self.app_name
+
 
 
 
 class AppDeployHistory(models.Model):
     MY_CHOICES = (  # 각 튜플의 첫 번째 요소는 DB에 저장할 실제 값이고, 두 번째 요소는 display 용 이름이다.
-        ('RollingUpdate', '롤링 업데이트 배포'),
-        ('BlueGreen', '블루그린 배포'),
-        ('Canary', '카나리 배포'),
+        ("RollingUpdate", "롤링 업데이트 배포"),
+        ("BlueGreen", "블루그린 배포"),
+        ("Canary", "카나리 배포"),
     )
 
     app_name = models.ForeignKey(AppInfo, on_delete=models.RESTRICT)
