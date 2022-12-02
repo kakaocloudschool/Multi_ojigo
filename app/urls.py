@@ -6,7 +6,7 @@ from .views import (
     cluster_list,
     del_cluster,
     deploy_app,
-    deploy_settings,
+
     history_app,
     delete_app,
 )
@@ -19,5 +19,5 @@ urlpatterns = [
     path("delete_app/<str:pk>", delete_app, name="delete_app"),
     path("appinfo_deploy/<str:pk>", deploy_app, name="appinfo_deploy"),
     path("appinfo_history", history_app, name="appinfo_history"),
-    path("deploy_settings", deploy_settings, name="deploy_settings"),
+
 ]
