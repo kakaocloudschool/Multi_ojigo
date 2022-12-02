@@ -31,34 +31,25 @@
 
                             <form action="#" method="POST" id='form'>
                                 {% csrf_token %}
-
                                 <div class="mb-4 " style="float:left; margin-right:25px;" >
-                                    <button class="btn btn-primary dropdown-toggle" type="button"
-                                        id="dropdownMenuDeploy" data-toggle="dropdown" aria-haspopup="true"
-                                        aria-expanded="false" style="color: lightslategray; background-color:white; border-color:lightgray; width:175px;">
-                                        Deployment 선택
-                                    </button>
-                                    <div class="dropdown-menu animated--fade-in"
-                                        aria-labelledby="dropdownMenuDeploy">
-                                            <a class="dropdown-item" href="#" id='aws' name='choice' data-value="aws" onclick='changeBtnAWS()'>AWS</a>
-                                            <a class="dropdown-item" href="#" id='gcp' name='choice' data-value="gcp" onclick='changeBtnGCP()'>GCP</a>
-                                    </div>
+                                    <select id="deployment" name="deployment" class="form-control">
+                                        <option hidden selected value="" id="nulldeployment">Deployment</option>
+                                        <option value="A">A</option>
+                                        <option value="B">B</option>
+                                        <option value="C">C</option>
+                                    </select>
                                 </div>
-
                                 <div class="mb-4 " style="float:left; margin-right:25px;" >
-                                    <button class="btn btn-primary dropdown-toggle" type="button"
-                                        id="dropdownMenuButton1" data-toggle="dropdown" aria-haspopup="true"
-                                        aria-expanded="false" style="color: lightslategray; background-color:white; border-color:lightgray; width:165px;">
-                                        Container 선택
-                                    </button>
-                                    <div class="dropdown-menu animated--fade-in"
-                                        aria-labelledby="dropdownMenuButton1">
-                                            <a class="dropdown-item" href="#" id='haha' name='choice1' data-value="haha" onclick='changeBtnHAHA()'>HAHA</a>
-                                            <a class="dropdown-item" href="#" id='ha' name='choice1' data-value="ha" onclick='changeBtnHA()'>HA</a>
-                                    </div>
+                                    <select id="container" name="container" class="form-control">
+                                        <option hidden selected value="" id="nullcontainer">Container</option>
+                                        <option value="1" parent="A">1</option>
+                                        <option value="2" parent="A">2</option>
+                                        <option value="3" parent="B">3</option>
+                                        <option value="4" parent="B">4</option>
+                                        <option value="5" parent="C">5</option>
+                                        <option value="6" parent="C">6</option>
+                                    </select>
                                 </div>
-
-
                                 <div class="mb-4 " >
                                     <input type="text" class="form-control form-control-user" style="float:left; margin-right:5px; width:150px; text-align:center;" id="appname"
                                         placeholder="Version 입력" name="appname" value="">
@@ -203,5 +194,17 @@
     </script>
 
 
-
+    <script>
+        var document = window.document;
+        $(document).ready(function(){
+            var $deploymentvar=$("#deployment");
+            var $containervar=$("#container");
+            var $containeroptions=$containervar.find('option');
+            $containervar.html($containeroptions.filter('[value=""]'));
+            $deploymentvar.on('change',function(){
+                $containervar.html($containeroptions.filter('[parent="'+this.value+'"],[value=""]'));
+                $('#container option[value=""]').prop('selected', true);
+            });
+        });
+    </script>
 {% endblock %}
