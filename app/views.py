@@ -142,9 +142,11 @@ def deploy_app(request, pk):
     return render(request, "app/app_deploy.html", {"form": form})
 
 
-
-# !
+# !!
 @login_required
 def history_app(request):
     qs = AppDeployHistory.objects.all()
+    q = request.GET.get("q", "")
+    if q:
+        qs = qs.filter(app_name__app_name__icontains=q)
     return render(request, "app/deploy_history.html", {"deploy_history": qs})
