@@ -146,7 +146,11 @@ def deploy_app(request, pk):
 @login_required
 def history_app(request, q):
     qs = AppDeployHistory.objects.all()
-    #q = request.GET.get("q", "")
+    # q = request.GET.get("q", "")
     if qs:
         qs = qs.filter(app_name__app_name__exact=q)
     return render(request, "app/deploy_history.html", {"deploy_history": qs})
+
+
+def test_web(request):
+    return render(request, "test.html")

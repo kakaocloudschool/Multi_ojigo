@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+
+<div class="container">
+    <div class="row">
+        <select id="deployment" name="deployment" class="w-25 form-control">
+            <option hidden selected value="" id="nulldeployment">Deployment</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+        </select>
+        <select id="container" name="container" class="w-25 form-control">
+            <option hidden selected value="" id="nullcontainer">Container</option>
+            <option value="1" parent="A">1</option>
+            <option value="2" parent="A">2</option>
+            <option value="3" parent="B">3</option>
+            <option value="4" parent="B">4</option>
+            <option value="5" parent="C">5</option>
+            <option value="6" parent="C">6</option>
+        </select>
+    </div>
+</div>
+<script>
+    var document = window.document;
+    $(document).ready(function(){
+        var $deploymentvar=$("#deployment");
+        var $containervar=$("#container");
+        var $containeroptions=$containervar.find('option');
+        $containervar.html($containeroptions.filter('[value=""]'));
+        $deploymentvar.on('change',function(){
+            $containervar.html($containeroptions.filter('[parent="'+this.value+'"],[value=""]'));
+            $('#container option[value=""]').prop('selected', true);
+        });
+    });
+</script>
+{% endblock %}

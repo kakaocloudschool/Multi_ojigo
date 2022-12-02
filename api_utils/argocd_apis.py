@@ -121,7 +121,7 @@ def create_argocd_app(
         },
     }
     resp = requests.post(url, headers=headers, data=json.dumps(data), verify=False)
-    if resp.status_code != 200:
+    if resp.status_code != 200 and resp.status_code != 201:
         return -1, "앱 등록 정보가 불일치 하거나, 이미 등록된 정보 입니다."
     return 1, "앱 등록이 완료 되었습니다."
 
@@ -138,13 +138,13 @@ def chk_and_register_cluster(cluster):
 
     resp = get_request_with_bearer(cluster_url, cluster.bearer_token)
 
-    if resp.status_code != 200:
+    if resp.status_code != 200 and resp.status_code != 201:
         return cluster, -1, "쿠버네티스 서버에 접근이 불가합니다."
 
     cluster.cluster_url = cluster_url
     resp = get_argocd_token(ARGOCD_URL, ARGOCD_USERNAME, ARGOCD_PASSWORD)
 
-    if resp.status_code != 200:
+    if resp.status_code != 200 and resp.status_code != 201:
         return cluster, -1, "Argo CD 서버에 접근이 불가합니다."
     argo_bearer_token = resp.json()["token"]
     resp = create_argocd_cluster(
@@ -155,7 +155,7 @@ def chk_and_register_cluster(cluster):
         cluster.bearer_token,
         cluster_ca,
     )
-    if resp.status_code != 200:
+    if resp.status_code != 200 and resp.status_code != 201:
         return cluster, -1, "이미 클러스터에 등록된 서버이거나, 확인이 필요합니다. 관리자에게 문의하세요."
 
     return cluster, 1, "클러스터 생성에 성공하였습니다. "
@@ -202,7 +202,7 @@ def create_argocd_app_check(
     target_path,
 ):
     resp = get_argocd_token(ARGOCD_URL, ARGOCD_USERNAME, ARGOCD_PASSWORD)
-    if resp.status_code != 200:
+    if resp.status_code != 200 and resp.status_code != 201:
         return -1, "배포 서버의 토큰 발급에 실패하였습니다."
     argo_bearer_token = resp.json()["token"]
 
@@ -267,7 +267,7 @@ def get_kubernetes_deployment(
     resp = requests.get(url, headers=headers, verify=False)
     deploy = {}
     print(url)
-    if resp.status_code != 200:
+    if resp.status_code != 200 and resp.status_code != 201:
         return -1, "디플로이먼트 조회 실패", deploy
     json_resp = resp.json()
     deploy["name"] = deployment
@@ -304,7 +304,7 @@ def get_app_deploy_and_service_info(cluster_url, cluster_token, app_name):
     resp = get_argocd_token(ARGOCD_URL, ARGOCD_USERNAME, ARGOCD_PASSWORD)
     argo_bearer_token = ""
     # 토큰 발급 실패면, 에러 팝업
-    if resp.status_code == 200:
+    if resp.status_code != 200 and resp.status_code != 201:
         argo_bearer_token = resp.json()["token"]
     else:
         return -1, "argo 토큰 발급 실패", {}, {}
@@ -379,23 +379,80 @@ def create_deployment_bluegreen(
         },
     }
     resp = requests.post(url, headers=headers, data=json.dumps(data), verify=False)
-    print(resp.text)
-    print(resp.status_code)
+    print(resp.text, resp.status_code)
+    if resp.status_code != 200 and resp.status_code != 201:
+        return -1, "디플로이먼트 배포 실패"
+    return 1, "디플로이먼트 배포 성공"
+
+
+def change_service_select_bg_label(
+    cluster_url, cluster_token, service_name, namespace, bg_label
+):
+    url = cluster_url + "/api/v1/namespaces/" + namespace + "/services/" + service_name
+    headers = CaseInsensitiveDict()
+    headers["Accept"] = "application/json"
+    headers["Authorization"] = f"Bearer {cluster_token}"
+    resp = requests.get(url, headers=headers, verify=False)
+    if resp.status_code != 200:
+        return -1, "서비스 조회 실패"
+    resp_json = resp.json()
+    resp_json["spec"]["selector"]["bluegreen"] = bg_label
+
+    url = cluster_url + "/api/v1/namespaces/" + namespace + "/services/" + service_name
+    headers = CaseInsensitiveDict()
+    headers["Accept"] = "application/json"
+    headers["Authorization"] = f"Bearer {cluster_token}"
+    resp = requests.put(url, headers=headers, data=json.dumps(resp_json), verify=False)
+
+    if resp.status_code != 200 and resp.status_code != 201:
+        return -1, "서비스 변경 실패"
+    return 1, "서비스 변경 성공"
+
+
+def delete_deployment_bluegreen(cluster_url, cluster_token, deploy_name, namespace):
+    url = (
+        cluster_url
+        + "/apis/apps/v1/namespaces/"
+        + namespace
+        + "/deployments/"
+        + deploy_name
+    )
+    headers = CaseInsensitiveDict()
+    headers["Accept"] = "application/json"
+    headers["Authorization"] = f"Bearer {cluster_token}"
+    resp = requests.delete(url, headers=headers, verify=False)
+    if resp.status_code != 200 and resp.status_code != 201:
+        return -1, "디플로이먼트 삭제 실패"
+    return 1, "디플로이먼트 삭제 성공"
 
 
 if __name__ == "__main__":
     cluster_url = "https://192.168.50.21:6443"
     cluster_token = "eyJhbGciOiJSUzI1NiIsImtpZCI6InJ4Q05BRlZvbzJpeTlVSDFpaTVZdjN1UnRvc2xTZmliSlN4Vmp6cWhtYk0ifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6ImRlZmF1bHQtdG9rZW4tdjd6OHciLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoiZGVmYXVsdCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6IjljZjU3NmZhLTYxZTgtNDlhMi05MDkzLTRiZjU1NmQ3MjI2NyIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpkZWZhdWx0OmRlZmF1bHQifQ.aD7E_V3SBfiyKo8TbrCg8y8y4qfjxvk7eYF11ybApjuQMJBtrGNmPpz8R3rSC2ION5rKYQQLO7cmSlfUOrplBFFYfFWGTgdkeC3IKhpuTcI-YpCpQYz-ktafrbBLvZQkbkJ7_IBJ3bZHegehBHXrl2F2pgmu6ft1tjszFMctbFxgDlk4VrdG7BXHIPuWPY0ZXDfe0V5AuYq4D5WvNCjLZlPYDTifjM3bll5Tq79M6frti57My59dXfbQ-VUfgRHcJAA37ZLY3IDIpfRc5O2IjZg4XznceKPw0v2tEWVD1yez-lgMhqwxE-fIttLKsFZvO3RKfcN0R-JKctU3nJFVLQ"
 
+    # 서비스 변경 TEST
+    # namespace = "test1234"
+    # service_name = "svc-nginx"
+    # bg_label = "yellow"
+    # ret_code, msg = change_service_select_label(
+    #     cluster_url=cluster_url,
+    #     cluster_token=cluster_token,
+    #     namespace=namespace,
+    #     service_name=service_name,
+    #     bg_label=bg_label,
+    # )
+    # print(ret_code, msg)
+
+    # 디플로이먼트 생성 TEST
     deploy_name = "test-blue"
     namespace = "test1234"
     image = "nginx:1.13"
-    replicas = 5
+    replicas = 1
     labels = {
         "app": "rollout-nginx",
         "app.kubernetes.io/instance": "testapp",
         "color": "blue",
-        "canary": "stable",
+        "canary": "canary",
     }
 
     if labels["color"] == "blue":
@@ -405,12 +462,14 @@ if __name__ == "__main__":
     elif labels["color"] == "green":
         deploy_name = deploy_name[:-5] + "blue"
         labels["color"] = "blue"
-    create_deployment_bluegreen(
-        cluster_url=cluster_url,
-        cluster_token=cluster_token,
-        deploy_name=deploy_name,
-        namespace=namespace,
-        image=image,
-        replicas=replicas,
-        labels=labels,
+    print(
+        create_deployment_bluegreen(
+            cluster_url=cluster_url,
+            cluster_token=cluster_token,
+            deploy_name=deploy_name,
+            namespace=namespace,
+            image=image,
+            replicas=replicas,
+            labels=labels,
+        )
     )
