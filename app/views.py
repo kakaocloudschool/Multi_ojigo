@@ -138,8 +138,15 @@ def deploy_app(request, pk):
 
 @login_required
 def deploy_settings(request):
-    #qs = AppDeployHistory.objects.all()
-    return render(request, "app/deploy_type.html")
+    # if form == 'RollingUpdate':
+    #     return render(request, "app/canary.html")
+    # elif form == 'BlueGreen':
+    #     return render(request, "app/bluegreen.html")
+    # elif form == 'BlueGreen':
+    #     return render(request, "app/rollingupdate.html")
+    # else:
+    #     return redirect("appinfo_deploy")
+    return render(request, "app/bluegreen.html")
 
 # !!
 @login_required

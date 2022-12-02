@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+
+{% block content %}
+
+    <!-- Page Wrapper -->
+    <div id="wrapper">
+
+        <!-- hello -->
+
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column">
+
+            <!-- Main Content -->
+            <div id="content">
+
+                <!-- Begin Page Content -->
+                <div class="container-fluid"><br/>
+
+                    <!-- Page Heading -->
+                    <h1 class="h3 mb-2 text-gray-800">Rolling Update</h1>
+                    
+
+                    <!-- DataTales Example -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary" style="float:left; margin-right: 10px;">APP 이름 들어갈 자리</h6>
+                            <label style="height: 10px; float:right; margin-right: 10px;">Namespace 들어갈 자리</label>
+                        </div>
+                        <div class="card-body">
+
+                            <form action="#" method="POST" id='form'>
+                                {% csrf_token %}
+
+<!--                                게이지 차는 뷰-->
+
+<!--                                여기까지 -->
+
+                                <hr/>
+
+                                <a href="#" class="btn btn-primary" style="float:right;" onclick="history.go(-1)">
+                                    <span class="icon text-white-50">
+                                    </span>
+                                    <span class="text">돌아가기</span>
+                                </a>
+                                <a href="#" class="btn btn-primary" style="float:right; margin-right:15px;" type="reset" onclick='return chk_form(); self.close();'>
+                                    <span class="icon text-white-50">
+                                    </span>
+                                    <span class="text">생성하기</span>
+                                </a>
+                                
+                            </form>
+                            
+                        </div>
+                    </div>
+
+                </div>
+                <!-- /.container-fluid -->
+
+            </div>
+            <!-- End of Main Content -->
+
+        </div>
+        <!-- End of Content Wrapper -->
+
+    </div>
+    <!-- End of Page Wrapper -->
+
+
+
+    <script>
+        function chk_form() {
+        if(document.getElementById("appname").value==''){
+            alert("Version 정보를 입력해주십시오.");
+            return false;
+        }
+
+        if(document.getElementById("namespace").value==''){
+            alert("Namespace를 입력해주십시오.");
+            return false;
+        }
+        if (document.getElementById("repourl").value=='') {
+            alert('GitHub Repository를 입력해주십시오.');
+            return false;
+        }
+        if (document.getElementById("targetrevision").value=='') {
+            alert('GitHub Branch를 입력해주십시오.');
+            return false;
+        }
+        if (document.getElementById("targetpath").value=='') {
+            alert('GitHub Manifest를 입력해주십시오.');
+            return false;
+        }
+        document.getElementById('form').submit();
+        }
+    </script>
+    <script>
+        function changeBtnAWS() {
+            const btnElement = document.getElementById('dropdownMenuDeploy');
+            const clustername = document.getElementById('aws').getAttribute('data-value');
+            btnElement.innerText = clustername;
+        }
+        function changeBtnGCP() {
+            const btnElement = document.getElementById('dropdownMenuDeploy');
+            const clustername = document.getElementById('gcp').getAttribute('data-value');
+            btnElement.innerText = clustername;
+        }
+        function changeBtnHAHA() {
+            const btnElement = document.getElementById('dropdownMenuButton1');
+            const clustername = document.getElementById('haha').getAttribute('data-value');
+            btnElement.innerText = clustername;
+        }
+        function changeBtnHA() {
+            const btnElement = document.getElementById('dropdownMenuButton1');
+            const clustername = document.getElementById('ha').getAttribute('data-value');
+            btnElement.innerText = clustername;
+        }
+    </script>
+
+
+
+{% endblock %}
