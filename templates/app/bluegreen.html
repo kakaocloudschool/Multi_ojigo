@@ -127,6 +127,11 @@
                                     </span>
                                     <span class="text">롤백</span>
                                 </a>
+                                <a href="app_list" class="btn btn-primary" style="float:right;" >
+                                    <span class="icon text-white-50">
+                                    </span>
+                                    <span class="text">나가기</span>
+                                </a>
                                 <a href="#" class="btn btn-primary" style="float:right;" onclick="history.go(-1)">
                                     <span class="icon text-white-50">
                                     </span>
@@ -153,27 +158,18 @@
 
     <script>
         function chk_form() {
-        if(document.getElementById("appname").value==''){
-            alert("Version 정보를 입력해주십시오.");
-            return false;
-        }
-
-        if(document.getElementById("namespace").value==''){
-            alert("Namespace를 입력해주십시오.");
-            return false;
-        }
-        if (document.getElementById("repourl").value=='') {
-            alert('GitHub Repository를 입력해주십시오.');
-            return false;
-        }
-        if (document.getElementById("targetrevision").value=='') {
-            alert('GitHub Branch를 입력해주십시오.');
-            return false;
-        }
-        if (document.getElementById("targetpath").value=='') {
-            alert('GitHub Manifest를 입력해주십시오.');
-            return false;
-        }
+            if(document.getElementById("appname").value==''){
+                alert("Version 정보를 입력해주십시오.");
+                return false;
+            }
+            if(document.getElementById("namespace").value==''){
+                alert("Namespace를 입력해주십시오.");
+                return false;
+            }
+            if (document.getElementById("repourl").value=='') {
+                alert('GitHub Repository를 입력해주십시오.');
+                return false;
+            }
         document.getElementById('form').submit();
         }
     </script>

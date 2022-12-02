@@ -132,15 +132,12 @@ def deploy_app(request, pk):
         deploy.user = request.user.id
         deploy.manager_user = request.user.id
         deploy.save()
-        if deploy.deploy_type == 'Rollingupdate':
-            return render(request, "app/rolligupdate.html")
+        if deploy.deploy_type == 'RollingUpdate':
+            return render(request, "app/rollingupdate.html")
         elif deploy.deploy_type == 'BlueGreen':
             return render(request, "app/bluegreen.html")
         elif deploy.deploy_type == 'Canary':
             return render(request, "app/canary.html")
-
-
-        return redirect("deploy_settings")
 
     return render(request, "app/app_deploy.html", {"form": form})
 
