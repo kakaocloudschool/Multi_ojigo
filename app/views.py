@@ -132,23 +132,21 @@ def deploy_app(request, pk):
         deploy.user = request.user.id
         deploy.manager_user = request.user.id
         deploy.save()
+        if deploy.deploy_type == 'Rollingupdate':
+            return render(request, "app/rolligupdate.html")
+        elif deploy.deploy_type == 'BlueGreen':
+            return render(request, "app/bluegreen.html")
+        elif deploy.deploy_type == 'Canary':
+            return render(request, "app/canary.html")
+
+
         return redirect("deploy_settings")
 
     return render(request, "app/app_deploy.html", {"form": form})
 
-@login_required
-def deploy_settings(request):
-    # if form == 'RollingUpdate':
-    #     return render(request, "app/canary.html")
-    # elif form == 'BlueGreen':
-    #     return render(request, "app/bluegreen.html")
-    # elif form == 'BlueGreen':
-    #     return render(request, "app/rollingupdate.html")
-    # else:
-    #     return redirect("appinfo_deploy")
-    return render(request, "app/bluegreen.html")
 
-# !!
+
+# !
 @login_required
 def history_app(request):
     qs = AppDeployHistory.objects.all()
