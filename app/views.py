@@ -8,9 +8,11 @@ from api_utils.argocd_apis import (
     del_argocd_cluster,
     create_argocd_app_check,
     del_argocd_app,
+    get_app_deploy_and_service_info,
+    post_rolling_update_sync,
 )
 from api_utils.kubernetes_apis import parsing_kube_confing
-from .forms import ClusterForm, AppInfoForm, DeployForm
+from .forms import ClusterForm, AppInfoForm, DeployForm, DeployMethodForm
 from .models import AppInfo, Cluster, AppDeployHistory
 
 ARGOCD_URL = getattr(settings, "ARGOCD_URL", None)
@@ -133,13 +135,92 @@ def deploy_app(request, pk):
         deploy.manager_user = request.user.id
         deploy.save()
         if deploy.deploy_type == "RollingUpdate":
-            return render(request, "app/rollingupdate.html",{"deploy": deploy,"appinfo":appinfo})
+            return redirect("rollingupdate", pk=deploy.app_name)
         elif deploy.deploy_type == "BlueGreen":
-            return render(request, "app/bluegreen.html",{"deploy": deploy,"appinfo":appinfo})
+            return redirect("bluegreen", pk=deploy.app_name)
         elif deploy.deploy_type == "Canary":
-            return render(request, "app/canary.html",{"deploy": deploy,"appinfo":appinfo})
+            return render(
+                request, "app/canary.html", {"deploy": deploy, "appinfo": appinfo}
+            )
 
     return render(request, "app/app_deploy.html", {"form": form})
+
+
+@login_required
+def rollingupdate(request, pk):
+    appinfo = get_object_or_404(AppInfo, pk=pk)
+    cluster = Cluster.objects.get(cluster_name=appinfo.cluster_name)
+    print(request.method)
+    if request.method == "POST":
+        print(request.POST)
+        if "rolling_deploy" in request.POST:
+            result_code, msg = post_rolling_update_sync(appinfo.app_name)
+            if result_code == -1:
+                messages.error(request, msg)
+            else:
+                messages.success(request, msg)
+
+    return render(
+        request,
+        "app/rollingupdate.html",
+        {"appinfo": appinfo},
+    )
+
+
+@login_required
+def bluegreen(request, pk):
+    appinfo = get_object_or_404(AppInfo, pk=pk)
+    cluster = Cluster.objects.get(cluster_name=appinfo.cluster_name)
+    if request.method == "POST":
+        form = DeployMethodForm(request.POST)
+        form.cluster_url = cluster.cluster_url
+        form.cluster_token = cluster.bearer_token
+        form.app_name = appinfo.app_name
+        form.namespace = appinfo.namespace
+        form.deployment = request.POST["deployment"]
+        form.container = request.POST["container"]
+        form.tag = request.POST["version"]
+        form.type = "bluegreen"
+        print(form.deployment)
+        if form.is_valid():
+            print("valid")
+
+    else:
+        form = DeployMethodForm()
+        form.cluster_url = cluster.cluster_url
+        form.cluster_token = cluster.bearer_token
+        form.app_name = appinfo.app_name
+        form.namespace = appinfo.namespace
+        form.type = "bluegreen"
+    result_code, msg, deploy_info_dict, svc_dict = get_app_deploy_and_service_info(
+        cluster_url=form.cluster_url,
+        cluster_token=form.cluster_token,
+        app_name=appinfo.app_name,
+    )
+    if result_code == -1:
+        messages.error(request, msg)
+        redirect("/")
+    else:
+        deploy_list = []
+        container_list = []
+        for deploy in deploy_info_dict:
+            deploy_list.append(deploy)
+            for container in deploy_info_dict[deploy]["image"]:
+                container_list.append(
+                    {"deploy": deploy, "image": container.split(":")[0]}
+                )
+    return render(
+        request,
+        "app/bluegreen.html",
+        {
+            "form": form,
+            "app_name": appinfo.app_name,
+            "namespace": appinfo.namespace,
+            "deploy_info": deploy_list,
+            "container_info": container_list,
+            "svc_dict": svc_dict,
+        },
+    )
 
 
 # !수정

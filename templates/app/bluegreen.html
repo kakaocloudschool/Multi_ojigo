@@ -24,57 +24,44 @@
                     <!-- DataTales Example -->
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary" style="float:left; margin-right: 10px;">{{appinfo.app_name}}</h6>
-                            <label style="height: 10px; float:right; margin-right: 10px;">
-                                NAMESPACE :{{appinfo.namespace}}
-                            </label>
+                            <h6 class="m-0 font-weight-bold text-primary" style="float:left; margin-right: 10px;">APP : {{ app_name }}</h6>
+                            <label style="height: 10px; float:right; margin-right: 10px;">NameSpace [ {{ namespace }} ]</label>
                         </div>
                         <div class="card-body">
 
-                            <form action="#" method="POST" id='form'>
+                            <form method="POST" id='form'>
                                 {% csrf_token %}
-
-                                <div class="mb-4 " style="float:left; margin-right:25px;" >
-                                    <select class="btn btn-primary dropdown-toggle" type="button" id="subject" name="subject" data-toggle="dropdown" aria-haspopup="true"
-                                            aria-expanded="false" style="color: lightslategray; background-color:white; border-color:lightgray; width:175px;">
-                                        <div class="dropdown-menu animated--fade-in" aria-labelledby="subject">
-                                            <option class="dropdown-item" value="" selected="selected">Select subject</option>
-                                        </div>
+                                <div class="mb-4 w-25" style="float:left; margin-right:25px;" >
+                                    <select id="deployment" name="deployment" class="form-control">
+                                        <option hidden selected value="" id="nulldeployment">Deployment</option>
+                                        {% for deployment in deploy_info %}
+                                            <option value="{{ deployment }}">{{ deployment }}</option>
+                                        {% endfor %}
                                     </select>
                                 </div>
-
-                                <div class="mb-4 " style="float:left; margin-right:25px;" >
-                                    <select class="btn btn-primary dropdown-toggle" type="button" name="topic" id="topic" data-toggle="dropdown" aria-haspopup="true"
-                                            aria-expanded="false" style="color: lightslategray; background-color:white; border-color:lightgray; width:150px;">
-                                        <div class="dropdown-menu animated--fade-in" aria-labelledby="topic">
-                                            <option class="dropdown-item" value="" selected="selected">Please select subject first</option>
-                                        </div>
-                                    </select>
-                                </div>
-                                <div class="mb-4 " style="float:left; margin-right:25px;" >
-                                    <select class="btn btn-primary dropdown-toggle" type="button" name="chapter" id="chapter" data-toggle="dropdown" aria-haspopup="true"
-                                                aria-expanded="false" style="color: lightslategray; background-color:white; border-color:lightgray; width:150px;">
-                                        <div class="dropdown-menu animated--fade-in" aria-labelledby="chapter">
-                                            <option class="dropdown-item" value="" selected="selected">Please select topic first</option>
-                                        </div>
+                                <div class="mb-4 w-50" style="float:left; margin-right:25px;" >
+                                    <select id="container" name="container" class="form-control">
+                                        <option hidden selected value="" id="nullcontainer">Container</option>
+                                        {% for container in container_info %}
+                                            <option value="{{ container.image }}" parent="{{ container.deploy }}">{{ container.image }}</option>
+                                        {% endfor %}
                                     </select>
                                 </div>
                                 <div class="mb-4 " >
-                                    <input type="text" class="form-control form-control-user" style="float:left; margin-right:5px; width:150px; text-align:center;" id="appname"
-                                        placeholder="Version 입력" name="appname" value="">
-                                    <a href="#" class="btn btn-primary" type="submit" onclick='return chk_form();'>
+                                    <input type="text" class="form-control form-control-user" style="float:left; margin-right:5px; width:150px; text-align:right;" id="version"
+                                        placeholder="Version 입력" name="version" value="">
+                                    <a class="btn btn-primary" type="target" >
                                         <span class="icon text-white-50">
                                         </span>
-                                        <span class="text">확인</span>
+                                        <button class="btn btn-primary" name="target">저장</button>
                                     </a>
                                 </div>
-
                                 <hr/>
 
-                                <a href="#" class="btn btn-primary" style="float:left; margin-right:15px;" type="reset" onclick='return chk_form(); self.close();'>
+                                <a class="btn btn-primary" style="float:left; margin-right:15px;" type="reset">
                                     <span class="icon text-white-50">
                                     </span>
-                                    <span class="text"> 배포</span>
+                                    <span class="text">green 배포</span>
                                 </a>
                                 <a href="#" class="btn btn-primary" style="float:left; margin-right:15px;" type="reset" onclick='return chk_form(); self.close();'>
                                     <span class="icon text-white-50">
@@ -117,68 +104,19 @@
 
     </div>
     <!-- End of Page Wrapper -->
-
-
-
-
-    <script>
-        var subjectObject = {
-            "Deploy1": {
-                "container1": ["Links", "Images", "Tables", "Lists"],
-                "CSS": ["Borders", "Margins", "Backgrounds", "Float"],
-                "JavaScript": ["Variables", "Operators", "Functions", "Conditions"]
-            },
-            "Deploy2": {
-                "PHP": ["Variables", "Strings", "Arrays"],
-                "SQL": ["SELECT", "UPDATE", "DELETE"]
-            }
-        }
-
-        window.onload = function() {
-            var subjectSel = document.getElementById("subject");
-            var topicSel = document.getElementById("topic");
-            var chapterSel = document.getElementById("chapter");
-            for (var x in subjectObject) {
-                subjectSel.options[subjectSel.options.length] = new Option(x, x);
-            }
-            subjectSel.onchange = function() {
-                chapterSel.length = 1;
-                topicSel.length = 1;
-
-                for (var y in subjectObject[this.value]) {
-                    topicSel.options[topicSel.options.length] = new Option(y, y);
-                }
-            }
-            topicSel.onchange = function() {
-                chapterSel.length = 1;
-
-                var z = subjectObject[subjectSel.value][this.value];
-                for (var i = 0; i < z.length; i++) {
-                    chapterSel.options[chapterSel.options.length] = new Option(z[i], z[i]);
-                }
-            }
-        }
-    </script>
-
-
-    <script>
-        function chk_form() {
-            if(document.getElementById("appname").value==''){
-                alert("Version 정보를 입력해주십시오.");
-                return false;
-            }
-<!--            if(document.getElementById("namespace").value==''){-->
-<!--                alert("Namespace를 입력해주십시오.");-->
-<!--                return false;-->
-<!--            }-->
-<!--            if (document.getElementById("repourl").value=='') {-->
-<!--                alert('GitHub Repository를 입력해주십시오.');-->
-<!--                return false;-->
-<!--            }-->
-        document.getElementById('form').submit();
-        }
-    </script>
-
-
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
+    var document = window.document;
+    $(document).ready(function(){
+        var $deploymentvar=$("#deployment");
+        var $containervar=$("#container");
+        var $containeroptions=$containervar.find('option');
+        $containervar.html($containeroptions.filter('[value=""]'));
+        $deploymentvar.on('change',function(){
+            $containervar.html($containeroptions.filter('[parent="'+this.value+'"],[value=""]'));
+            $('#container option[value=""]').prop('selected', true);
+        });
+    });
+</script>
 
 {% endblock %}

@@ -49,5 +49,9 @@ class AppDeployHistory(models.Model):
         max_length=20, choices=MY_CHOICES, default="RollingUpdate"
     )
     user = models.CharField(max_length=100)
+    namespace = models.CharField(max_length=100, blank=True)
+    deployment = models.CharField(max_length=100, blank=True)
+    container = models.CharField(max_length=100, blank=True)
+    step = models.CharField(max_length=30)
     manager_user = models.CharField(max_length=100)
     insert_at = models.DateTimeField(auto_now_add=True)

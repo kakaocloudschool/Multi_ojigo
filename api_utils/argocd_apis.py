@@ -35,9 +35,7 @@ def get_request_with_bearer(url: str, bearer_token: str) -> requests.models.Resp
     headers = CaseInsensitiveDict()
     headers["Accept"] = "application/json"
     headers["Authorization"] = f"Bearer {bearer_token}"
-    print("test3")
     resp = requests.get(url, headers=headers, verify=False)
-    print("test4")
     return resp
 
 
@@ -121,7 +119,7 @@ def create_argocd_app(
         },
     }
     resp = requests.post(url, headers=headers, data=json.dumps(data), verify=False)
-    if resp.status_code != 200 and resp.status_code != 201:
+    if resp.status_code not in (200, 201):
         return -1, "앱 등록 정보가 불일치 하거나, 이미 등록된 정보 입니다."
     return 1, "앱 등록이 완료 되었습니다."
 
@@ -235,7 +233,6 @@ def get_argo_service_deployment_name(
     argocd_url: str, argo_bearer_token: str, app_name: str
 ):
     url = argocd_url + "/api/v1/applications/" + app_name + "/resource-tree"
-    print(url)
     headers = CaseInsensitiveDict()
     headers["Accept"] = "application/json"
     headers["Authorization"] = f"Bearer {argo_bearer_token}"
@@ -256,7 +253,7 @@ def get_kubernetes_deployment(
 ):
     url = (
         cluster_url
-        + "/apis/apps/v1/namespaces/"
+        + "apis/apps/v1/namespaces/"
         + namespace
         + "/deployments/"
         + deployment
@@ -266,8 +263,9 @@ def get_kubernetes_deployment(
     headers["Authorization"] = f"Bearer {cluster_token}"
     resp = requests.get(url, headers=headers, verify=False)
     deploy = {}
+    print(resp)
     print(url)
-    if resp.status_code != 200 and resp.status_code != 201:
+    if resp.status_code not in (200, 201):
         return -1, "디플로이먼트 조회 실패", deploy
     json_resp = resp.json()
     deploy["name"] = deployment
@@ -284,7 +282,7 @@ def get_kubernetes_deployment(
 def get_kubernetes_service(
     cluster_url: str, cluster_token: str, namespace: str, service: str
 ):
-    url = cluster_url + "/api/v1/namespaces/" + namespace + "/services/" + service
+    url = cluster_url + "api/v1/namespaces/" + namespace + "/services/" + service
     headers = CaseInsensitiveDict()
     headers["Accept"] = "application/json"
     headers["Authorization"] = f"Bearer {cluster_token}"
@@ -300,13 +298,32 @@ def get_kubernetes_service(
     return 1, "서비스 조회 성공", service_dic
 
 
+def post_rolling_update_sync(app_name):
+    print(1)
+    resp = get_argocd_token(ARGOCD_URL, ARGOCD_USERNAME, ARGOCD_PASSWORD)
+    if resp.status_code in (200, 201):
+        argo_bearer_token = resp.json()["token"]
+    else:
+        return -1, "argo 토큰 발급 실패"
+    url = str(ARGOCD_URL) + "api/v1/applications/" + str(app_name) + "/sync"
+    headers = CaseInsensitiveDict()
+    headers["Accept"] = "application/json"
+    headers["Authorization"] = f"Bearer {argo_bearer_token}"
+    resp = requests.post(url, headers=headers, verify=False)
+    if resp.status_code != 200:
+        return -1, "롤링 업데이트 전송 실패"
+    else:
+        return 1, "롤링 업데이트 전송 성공"
+
+
 def get_app_deploy_and_service_info(cluster_url, cluster_token, app_name):
     resp = get_argocd_token(ARGOCD_URL, ARGOCD_USERNAME, ARGOCD_PASSWORD)
     argo_bearer_token = ""
     # 토큰 발급 실패면, 에러 팝업
-    if resp.status_code != 200 and resp.status_code != 201:
+    if resp.status_code in (200, 201):
         argo_bearer_token = resp.json()["token"]
     else:
+        print(resp.status_code, resp.text)
         return -1, "argo 토큰 발급 실패", {}, {}
     name_deploy_dict, service_dict = get_argo_service_deployment_name(
         ARGOCD_URL, argo_bearer_token, app_name
@@ -344,7 +361,7 @@ def get_app_deploy_and_service_info(cluster_url, cluster_token, app_name):
 def create_deployment_bluegreen(
     cluster_url, cluster_token, deploy_name, namespace, image, replicas, labels
 ):
-    url = cluster_url + "/apis/apps/v1/namespaces/" + namespace + "/deployments"
+    url = cluster_url + "apis/apps/v1/namespaces/" + namespace + "/deployments"
     headers = CaseInsensitiveDict()
     headers["Accept"] = "application/json"
     headers["Authorization"] = f"Bearer {cluster_token}"
@@ -379,7 +396,6 @@ def create_deployment_bluegreen(
         },
     }
     resp = requests.post(url, headers=headers, data=json.dumps(data), verify=False)
-    print(resp.text, resp.status_code)
     if resp.status_code != 200 and resp.status_code != 201:
         return -1, "디플로이먼트 배포 실패"
     return 1, "디플로이먼트 배포 성공"
@@ -388,7 +404,7 @@ def create_deployment_bluegreen(
 def change_service_select_bg_label(
     cluster_url, cluster_token, service_name, namespace, bg_label
 ):
-    url = cluster_url + "/api/v1/namespaces/" + namespace + "/services/" + service_name
+    url = cluster_url + "api/v1/namespaces/" + namespace + "/services/" + service_name
     headers = CaseInsensitiveDict()
     headers["Accept"] = "application/json"
     headers["Authorization"] = f"Bearer {cluster_token}"
@@ -398,7 +414,7 @@ def change_service_select_bg_label(
     resp_json = resp.json()
     resp_json["spec"]["selector"]["bluegreen"] = bg_label
 
-    url = cluster_url + "/api/v1/namespaces/" + namespace + "/services/" + service_name
+    url = cluster_url + "api/v1/namespaces/" + namespace + "/services/" + service_name
     headers = CaseInsensitiveDict()
     headers["Accept"] = "application/json"
     headers["Authorization"] = f"Bearer {cluster_token}"
@@ -412,7 +428,7 @@ def change_service_select_bg_label(
 def delete_deployment_bluegreen(cluster_url, cluster_token, deploy_name, namespace):
     url = (
         cluster_url
-        + "/apis/apps/v1/namespaces/"
+        + "apis/apps/v1/namespaces/"
         + namespace
         + "/deployments/"
         + deploy_name

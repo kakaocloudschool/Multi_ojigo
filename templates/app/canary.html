@@ -35,9 +35,9 @@
                                 <div class="mb-4 " style="float:left; margin-right:25px;" >
                                     <select id="deployment" name="deployment" class="form-control">
                                         <option hidden selected value="" id="nulldeployment">Deployment</option>
-                                        <option value="A">A</option>
-                                        <option value="B">B</option>
-                                        <option value="C">C</option>
+                                        {% for deployment in deploy_info %}
+                                            <option value="{{ deployment }}">{{ deployment }}</option>
+                                        {% endfor %}
                                     </select>
                                 </div>
                                 <div class="mb-4 " style="float:left; margin-right:25px;" >
@@ -60,43 +60,6 @@
                                         <span class="text">적용</span>
                                     </a>
                                 </div>
-
-<!--                                <div class="mb-4" >-->
-<!--                                -->
-<!--                                    <p style="width: 160px; float:left; margin-right: 10px;">Namespace 생성유무 </p>-->
-<!--                                    <fieldset>-->
-<!--                                        <div class="custom-control custom-checkbox small" style="float:left; margin-right: 10px;">-->
-<!--                                            <input type="checkbox" class="custom-control-input" id="namespacetrue" name="typecheck" />-->
-<!--                                            <label class="custom-control-label" for="namespacetrue"></label>-->
-<!--                                        </div>-->
-
-<!--                                    </fieldset>-->
-
-<!--                                </div>-->
-
-<!--                                <div class="mb-4" style="float:left; margin-right:15px;">-->
-
-<!--                                    <input type="text" class="form-control form-control-user" style="width:150px;" id="namespace"-->
-<!--                                        placeholder="namespace" name="namespace" value="">-->
-<!--                                </div>-->
-
-                                
-<!--                                <div class="mb-4" >-->
-<!--                                    <p style="width: 160px; float:left; margin-right: 10px;">GITHUB 주소 : </p>-->
-<!--                                    <input type="text" class="form-control form-control-user" style="width:150px;" id="repourl"-->
-<!--                                        placeholder="repoURL" name="repourl" value="">-->
-<!--                                </div>-->
-<!--                                <div class="mb-4 " >-->
-<!--                                    <p style="width: 160px; float:left; margin-right: 10px;">Target Branch : </p>-->
-<!--                                    <input type="text" class="form-control form-control-user" style="width:150px;" id="targetrevision"-->
-<!--                                        placeholder="targetRevision" name="targetrevision" value="">-->
-<!--                                </div>-->
-<!--                                -->
-<!--                                <div class="mb-4" >-->
-<!--                                    <p style="width: 160px; float:left; margin-right: 10px;">GITHUB Manifest Path : </p>-->
-<!--                                    <input type="text" class="form-control form-control-user" style="width:150px;" id="targetpath"-->
-<!--                                        placeholder="path" name="targetpath" value="">-->
-<!--                                </div>-->
                                 <hr/>
 
                                 <a href="#" class="btn btn-primary" style="float:left; margin-right:15px;" type="reset" onclick='return chk_form(); self.close();'>
