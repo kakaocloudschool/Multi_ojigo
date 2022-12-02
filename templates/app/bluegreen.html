@@ -32,60 +32,40 @@
                             <form action="#" method="POST" id='form'>
                                 {% csrf_token %}
 
-                                <form name="form1" id="form1" action="/action_page.php">
-  Deployment: <select class="btn btn-primary dropdown-toggle" name="subject" id="subject">
-    <option value="" selected="selected">Select subject</option>
-  </select>
-  <br><br>
-  Container: <select name="topic" id="topic">
-    <option value="" selected="selected">Please select subject first</option>
-  </select>
-  <br><br>
-  Version: <select name="chapter" id="chapter">
-    <option value="" selected="selected">Please select topic first</option>
-  </select>
-  <br><br>
-  <input type="submit" value="Submit">
-</form>
-
-
-<!--
                                 <div class="mb-4 " style="float:left; margin-right:25px;" >
-                                    <button class="btn btn-primary dropdown-toggle" type="button"
-                                        id="dropdownMenuDeploy" data-toggle="dropdown" aria-haspopup="true"
-                                        aria-expanded="false" style="color: lightslategray; background-color:white; border-color:lightgray; width:175px;">
-                                        Deployment 선택
-                                    </button>
-                                    <div class="dropdown-menu animated--fade-in"
-                                        aria-labelledby="dropdownMenuDeploy">
-                                            <a class="dropdown-item" href="#" id='aws' name='choice' data-value="aws" onclick='changeBtnAWS()'>AWS</a>
-                                            <a class="dropdown-item" href="#" id='gcp' name='choice' data-value="gcp" onclick='changeBtnGCP()'>GCP</a>
-                                    </div>
+                                    <select class="btn btn-primary dropdown-toggle" type="button" id="subject" name="subject" data-toggle="dropdown" aria-haspopup="true"
+                                            aria-expanded="false" style="color: lightslategray; background-color:white; border-color:lightgray; width:175px;">
+                                        <div class="dropdown-menu animated--fade-in" aria-labelledby="subject">
+                                            <option class="dropdown-item" value="" selected="selected">Select subject</option>
+                                        </div>
+                                    </select>
                                 </div>
 
                                 <div class="mb-4 " style="float:left; margin-right:25px;" >
-                                    <button class="btn btn-primary dropdown-toggle" type="button"
-                                        id="dropdownMenuButton1" data-toggle="dropdown" aria-haspopup="true"
-                                        aria-expanded="false" style="color: lightslategray; background-color:white; border-color:lightgray; width:150px;">
-                                        Container 선택
-                                    </button>
-                                    <div class="dropdown-menu animated--fade-in"
-                                        aria-labelledby="dropdownMenuButton1">
-                                            <a class="dropdown-item" href="#" id='haha' name='choice1' data-value="haha" onclick='changeBtnHAHA()'>HAHA</a>
-                                            <a class="dropdown-item" href="#" id='ha' name='choice1' data-value="ha" onclick='changeBtnHA()'>HA</a>
-                                    </div>
+                                    <select class="btn btn-primary dropdown-toggle" type="button" name="topic" id="topic" data-toggle="dropdown" aria-haspopup="true"
+                                            aria-expanded="false" style="color: lightslategray; background-color:white; border-color:lightgray; width:150px;">
+                                        <div class="dropdown-menu animated--fade-in" aria-labelledby="topic">
+                                            <option class="dropdown-item" value="" selected="selected">Please select subject first</option>
+                                        </div>
+                                    </select>
                                 </div>
-
-
+<!--                                <div class="mb-4 " style="float:left; margin-right:25px;" >-->
+<!--                                    <select class="btn btn-primary dropdown-toggle" type="button" name="chapter" id="chapter" data-toggle="dropdown" aria-haspopup="true"-->
+<!--                                                aria-expanded="false" style="color: lightslategray; background-color:white; border-color:lightgray; width:150px;">-->
+<!--                                        <div class="dropdown-menu animated&#45;&#45;fade-in" aria-labelledby="chapter">-->
+<!--                                            <option class="dropdown-item" value="" selected="selected">Please select topic first</option>-->
+<!--                                        </div>-->
+<!--                                    </select>-->
+<!--                                </div>-->
                                 <div class="mb-4 " >
                                     <input type="text" class="form-control form-control-user" style="float:left; margin-right:5px; width:150px; text-align:center;" id="appname"
                                         placeholder="Version 입력" name="appname" value="">
-                                    <a href="#" class="btn btn-primary" type="reset" onclick='return chk_form(); self.close();'>
+                                    <a href="#" class="btn btn-primary" type="submit" onclick='return chk_form();'>
                                         <span class="icon text-white-50">
                                         </span>
                                         <span class="text">적용</span>
                                     </a>
-                                </div> -->
+                                </div>
 
                                 <hr/>
 
@@ -138,84 +118,65 @@
 
 
 
+
+    <script>
+        var subjectObject = {
+            "Deploy1": {
+                "container1": ["Links", "Images", "Tables", "Lists"],
+                "CSS": ["Borders", "Margins", "Backgrounds", "Float"],
+                "JavaScript": ["Variables", "Operators", "Functions", "Conditions"]
+            },
+            "Deploy2": {
+                "PHP": ["Variables", "Strings", "Arrays"],
+                "SQL": ["SELECT", "UPDATE", "DELETE"]
+            }
+        }
+
+        window.onload = function() {
+            var subjectSel = document.getElementById("subject");
+            var topicSel = document.getElementById("topic");
+            var chapterSel = document.getElementById("chapter");
+            for (var x in subjectObject) {
+                subjectSel.options[subjectSel.options.length] = new Option(x, x);
+            }
+            subjectSel.onchange = function() {
+                chapterSel.length = 1;
+                topicSel.length = 1;
+
+                for (var y in subjectObject[this.value]) {
+                    topicSel.options[topicSel.options.length] = new Option(y, y);
+                }
+            }
+            topicSel.onchange = function() {
+                chapterSel.length = 1;
+
+                var z = subjectObject[subjectSel.value][this.value];
+                for (var i = 0; i < z.length; i++) {
+                    chapterSel.options[chapterSel.options.length] = new Option(z[i], z[i]);
+                }
+            }
+        }
+    </script>
+
+
     <script>
         function chk_form() {
             if(document.getElementById("appname").value==''){
                 alert("Version 정보를 입력해주십시오.");
                 return false;
             }
-            if(document.getElementById("namespace").value==''){
-                alert("Namespace를 입력해주십시오.");
-                return false;
-            }
-            if (document.getElementById("repourl").value=='') {
-                alert('GitHub Repository를 입력해주십시오.');
-                return false;
-            }
+<!--            if(document.getElementById("namespace").value==''){-->
+<!--                alert("Namespace를 입력해주십시오.");-->
+<!--                return false;-->
+<!--            }-->
+<!--            if (document.getElementById("repourl").value=='') {-->
+<!--                alert('GitHub Repository를 입력해주십시오.');-->
+<!--                return false;-->
+<!--            }-->
         document.getElementById('form').submit();
         }
     </script>
-    <script>
-        function changeBtnAWS() {
-            const btnElement = document.getElementById('dropdownMenuDeploy');
-            const clustername = document.getElementById('aws').getAttribute('data-value');
-            btnElement.innerText = clustername;
-        }
-        function changeBtnGCP() {
-            const btnElement = document.getElementById('dropdownMenuDeploy');
-            const clustername = document.getElementById('gcp').getAttribute('data-value');
-            btnElement.innerText = clustername;
-        }
-        function changeBtnHAHA() {
-            const btnElement = document.getElementById('dropdownMenuButton1');
-            const clustername = document.getElementById('haha').getAttribute('data-value');
-            btnElement.innerText = clustername;
-        }
-        function changeBtnHA() {
-            const btnElement = document.getElementById('dropdownMenuButton1');
-            const clustername = document.getElementById('ha').getAttribute('data-value');
-            btnElement.innerText = clustername;
-        }
-    </script>
 
 
-<script>
-    var subjectObject = {
-  "Deploy1": {
-    "container1": ["Links", "Images", "Tables", "Lists"],
-    "CSS": ["Borders", "Margins", "Backgrounds", "Float"],
-    "JavaScript": ["Variables", "Operators", "Functions", "Conditions"]
-  },
-  "Deploy2": {
-    "PHP": ["Variables", "Strings", "Arrays"],
-    "SQL": ["SELECT", "UPDATE", "DELETE"]
-  }
-}
-window.onload = function() {
-  var subjectSel = document.getElementById("subject");
-  var topicSel = document.getElementById("topic");
-  var chapterSel = document.getElementById("chapter");
-  for (var x in subjectObject) {
-    subjectSel.options[subjectSel.options.length] = new Option(x, x);
-  }
-  subjectSel.onchange = function() {
-    //empty Chapters- and Topics- dropdowns
-    chapterSel.length = 1;
-    topicSel.length = 1;
-    //display correct values
-    for (var y in subjectObject[this.value]) {
-      topicSel.options[topicSel.options.length] = new Option(y, y);
-    }
-  }
-  topicSel.onchange = function() {
-    //empty Chapters dropdown
-    chapterSel.length = 1;
-    //display correct values
-    var z = subjectObject[subjectSel.value][this.value];
-    for (var i = 0; i < z.length; i++) {
-      chapterSel.options[chapterSel.options.length] = new Option(z[i], z[i]);
-    }
-  }
-}
-</script>
+
 {% endblock %}
