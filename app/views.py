@@ -144,7 +144,7 @@ def deploy_app(request, pk):
 
 # !수정
 @login_required
-def history_app(request,q):
+def history_app(request, q):
     qs = AppDeployHistory.objects.all()
     #q = request.GET.get("q", "")
     if qs:
