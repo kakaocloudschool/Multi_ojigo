@@ -6,12 +6,16 @@ from .kubernetes_apis import (
     create_namespace_in_cluster,
     parsing_kube_confing,
 )
+
 from django.conf import settings
+from collections import defaultdict
 
-
+# ARGOCD_URL = "https://192.168.50.104/"
+# ARGOCD_USERNAME = "admin"
+# ARGOCD_PASSWORD = "hHGfeDCRrCJ2pXCP"
 ARGOCD_URL = getattr(settings, "ARGOCD_URL", None)
 ARGOCD_USERNAME = getattr(settings, "ARGOCD_USERNAME", None)
-ARGO_PASSWORD = getattr(settings, "ARGO_PASSWORD", None)
+ARGOCD_PASSWORD = getattr(settings, "ARGO_PASSWORD", None)
 
 
 def get_argocd_token(
@@ -138,7 +142,7 @@ def chk_and_register_cluster(cluster):
         return cluster, -1, "쿠버네티스 서버에 접근이 불가합니다."
 
     cluster.cluster_url = cluster_url
-    resp = get_argocd_token(ARGOCD_URL, ARGOCD_USERNAME, ARGO_PASSWORD)
+    resp = get_argocd_token(ARGOCD_URL, ARGOCD_USERNAME, ARGOCD_PASSWORD)
 
     if resp.status_code != 200:
         return cluster, -1, "Argo CD 서버에 접근이 불가합니다."
@@ -158,7 +162,7 @@ def chk_and_register_cluster(cluster):
 
 
 def del_argocd_cluster(cluster_url):
-    resp = get_argocd_token(ARGOCD_URL, ARGOCD_USERNAME, ARGO_PASSWORD)
+    resp = get_argocd_token(ARGOCD_URL, ARGOCD_USERNAME, ARGOCD_PASSWORD)
     argo_bearer_token = resp.json()["token"]
     url = ARGOCD_URL + "api/v1/clusters/" + cluster_url
 
@@ -174,7 +178,7 @@ def del_argocd_cluster(cluster_url):
 
 
 def del_argocd_app(app_name):
-    resp = get_argocd_token(ARGOCD_URL, ARGOCD_USERNAME, ARGO_PASSWORD)
+    resp = get_argocd_token(ARGOCD_URL, ARGOCD_USERNAME, ARGOCD_PASSWORD)
     argo_bearer_token = resp.json()["token"]
     url = ARGOCD_URL + "api/v1/applications/" + app_name
     headers = CaseInsensitiveDict()
@@ -197,7 +201,7 @@ def create_argocd_app_check(
     target_revision,
     target_path,
 ):
-    resp = get_argocd_token(ARGOCD_URL, ARGOCD_USERNAME, ARGO_PASSWORD)
+    resp = get_argocd_token(ARGOCD_URL, ARGOCD_USERNAME, ARGOCD_PASSWORD)
     if resp.status_code != 200:
         return -1, "배포 서버의 토큰 발급에 실패하였습니다."
     argo_bearer_token = resp.json()["token"]
@@ -225,3 +229,188 @@ def create_argocd_app_check(
             target_revision=target_revision,
             cluster_url=cluster_url,
         )
+
+
+def get_argo_service_deployment_name(
+    argocd_url: str, argo_bearer_token: str, app_name: str
+):
+    url = argocd_url + "/api/v1/applications/" + app_name + "/resource-tree"
+    print(url)
+    headers = CaseInsensitiveDict()
+    headers["Accept"] = "application/json"
+    headers["Authorization"] = f"Bearer {argo_bearer_token}"
+    resp = requests.get(url, headers=headers, verify=False)
+    deployment_dict = defaultdict(list)
+    service_dict = defaultdict(list)
+    json_resp = resp.json()
+    for resource in json_resp["nodes"]:
+        if resource["kind"] == "Deployment":
+            deployment_dict[resource["namespace"]].append(resource["name"])
+        if resource["kind"] == "Service":
+            service_dict[resource["namespace"]].append(resource["name"])
+    return deployment_dict, service_dict
+
+
+def get_kubernetes_deployment(
+    cluster_url: str, cluster_token: str, namespace: str, deployment: str
+):
+    url = (
+        cluster_url
+        + "/apis/apps/v1/namespaces/"
+        + namespace
+        + "/deployments/"
+        + deployment
+    )
+    headers = CaseInsensitiveDict()
+    headers["Accept"] = "application/json"
+    headers["Authorization"] = f"Bearer {cluster_token}"
+    resp = requests.get(url, headers=headers, verify=False)
+    deploy = {}
+    print(url)
+    if resp.status_code != 200:
+        return -1, "디플로이먼트 조회 실패", deploy
+    json_resp = resp.json()
+    deploy["name"] = deployment
+    deploy["namespace"] = namespace
+    deploy["cluster_url"] = cluster_url
+    deploy["labels"] = json_resp["metadata"]["labels"]
+    deploy["replicas"] = json_resp["spec"]["replicas"]
+    deploy["image"] = []
+    for container in json_resp["spec"]["template"]["spec"]["containers"]:
+        deploy["image"].append(container["image"])
+    return 1, "디플로이먼트 조회 성공", deploy
+
+
+def get_kubernetes_service(
+    cluster_url: str, cluster_token: str, namespace: str, service: str
+):
+    url = cluster_url + "/api/v1/namespaces/" + namespace + "/services/" + service
+    headers = CaseInsensitiveDict()
+    headers["Accept"] = "application/json"
+    headers["Authorization"] = f"Bearer {cluster_token}"
+    resp = requests.get(url, headers=headers, verify=False)
+    service_dic = {}
+    if resp.status_code != 200:
+        return -1, "서비스 조회 실패", service_dic
+    json_resp = resp.json()
+    service_dic["name"] = service
+    service_dic["namespace"] = namespace
+    service_dic["cluster_url"] = cluster_url
+    service_dic["labels"] = json_resp["metadata"]["labels"]
+    return 1, "서비스 조회 성공", service_dic
+
+
+def get_app_deploy_and_service_info(cluster_url, cluster_token, app_name):
+    resp = get_argocd_token(ARGOCD_URL, ARGOCD_USERNAME, ARGOCD_PASSWORD)
+    argo_bearer_token = ""
+    # 토큰 발급 실패면, 에러 팝업
+    if resp.status_code == 200:
+        argo_bearer_token = resp.json()["token"]
+    else:
+        return -1, "argo 토큰 발급 실패", {}, {}
+    name_deploy_dict, service_dict = get_argo_service_deployment_name(
+        ARGOCD_URL, argo_bearer_token, app_name
+    )
+    deploy_info_dict = {}
+    svc_dict = {}
+
+    for namespace, deployments in name_deploy_dict.items():
+        for deployment in deployments:
+            result_code, msg, deploy = get_kubernetes_deployment(
+                cluster_url=cluster_url,
+                cluster_token=cluster_token,
+                namespace=namespace,
+                deployment=deployment,
+            )
+            deploy_info_dict[deployment] = deploy
+            if result_code != 1:
+                return -1, msg, {}, {}
+
+    for namespace, services in service_dict.items():
+        for service in services:
+            result_code, msg, svc = get_kubernetes_service(
+                cluster_url=cluster_url,
+                cluster_token=cluster_token,
+                namespace=namespace,
+                service=service,
+            )
+            svc_dict[service] = svc
+            if result_code != 1:
+                return -1, msg, {}, {}
+
+    return 1, "서비스 조회 성공", deploy_info_dict, svc_dict
+
+
+def create_deployment_bluegreen(
+    cluster_url, cluster_token, deploy_name, namespace, image, replicas, labels
+):
+    url = cluster_url + "/apis/apps/v1/namespaces/" + namespace + "/deployments"
+    headers = CaseInsensitiveDict()
+    headers["Accept"] = "application/json"
+    headers["Authorization"] = f"Bearer {cluster_token}"
+    data = {
+        "kind": "Deployment",
+        "apiVersion": "apps/v1",
+        "metadata": {
+            "name": deploy_name,
+            "namespace": namespace,
+            "labels": labels,
+        },
+        "spec": {
+            "replicas": replicas,
+            "selector": {
+                "matchLabels": labels,
+            },
+            "template": {
+                "metadata": {
+                    "labels": labels,
+                },
+                "spec": {
+                    "containers": [
+                        {
+                            "name": deploy_name,
+                            "image": image,
+                            "imagePullPolicy": "IfNotPresent",
+                        }
+                    ]
+                },
+            },
+            "revisionHistoryLimit": 10,
+        },
+    }
+    resp = requests.post(url, headers=headers, data=json.dumps(data), verify=False)
+    print(resp.text)
+    print(resp.status_code)
+
+
+if __name__ == "__main__":
+    cluster_url = "https://192.168.50.21:6443"
+    cluster_token = "eyJhbGciOiJSUzI1NiIsImtpZCI6InJ4Q05BRlZvbzJpeTlVSDFpaTVZdjN1UnRvc2xTZmliSlN4Vmp6cWhtYk0ifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6ImRlZmF1bHQtdG9rZW4tdjd6OHciLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoiZGVmYXVsdCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6IjljZjU3NmZhLTYxZTgtNDlhMi05MDkzLTRiZjU1NmQ3MjI2NyIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpkZWZhdWx0OmRlZmF1bHQifQ.aD7E_V3SBfiyKo8TbrCg8y8y4qfjxvk7eYF11ybApjuQMJBtrGNmPpz8R3rSC2ION5rKYQQLO7cmSlfUOrplBFFYfFWGTgdkeC3IKhpuTcI-YpCpQYz-ktafrbBLvZQkbkJ7_IBJ3bZHegehBHXrl2F2pgmu6ft1tjszFMctbFxgDlk4VrdG7BXHIPuWPY0ZXDfe0V5AuYq4D5WvNCjLZlPYDTifjM3bll5Tq79M6frti57My59dXfbQ-VUfgRHcJAA37ZLY3IDIpfRc5O2IjZg4XznceKPw0v2tEWVD1yez-lgMhqwxE-fIttLKsFZvO3RKfcN0R-JKctU3nJFVLQ"
+
+    deploy_name = "test-blue"
+    namespace = "test1234"
+    image = "nginx:1.13"
+    replicas = 5
+    labels = {
+        "app": "rollout-nginx",
+        "app.kubernetes.io/instance": "testapp",
+        "color": "blue",
+        "canary": "stable",
+    }
+
+    if labels["color"] == "blue":
+        deploy_name = deploy_name[:-4] + "green"
+        labels["color"] = "green"
+
+    elif labels["color"] == "green":
+        deploy_name = deploy_name[:-5] + "blue"
+        labels["color"] = "blue"
+    create_deployment_bluegreen(
+        cluster_url=cluster_url,
+        cluster_token=cluster_token,
+        deploy_name=deploy_name,
+        namespace=namespace,
+        image=image,
+        replicas=replicas,
+        labels=labels,
+    )
