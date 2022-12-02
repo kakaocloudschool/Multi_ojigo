@@ -132,7 +132,7 @@ def deploy_app(request, pk):
         deploy.user = request.user.id
         deploy.manager_user = request.user.id
         deploy.save()
-        if deploy.deploy_type == "Rollingupdate":
+        if deploy.deploy_type == "RollingUpdate":
             return render(request, "app/rollingupdate.html")
         elif deploy.deploy_type == "BlueGreen":
             return render(request, "app/bluegreen.html")
@@ -144,9 +144,9 @@ def deploy_app(request, pk):
 
 # !!
 @login_required
-def history_app(request):
+def history_app(request,q):
     qs = AppDeployHistory.objects.all()
-    q = request.GET.get("q", "")
-    if q:
-        qs = qs.filter(app_name__app_name__icontains=q)
-    return render(request, "app/deploy_history.html", {"deploy_history": qs})
+    #q = request.GET.get("q", "")
+    if qs:
+        q = qs.filter(app_name__app_name__icontains=q)
+    return render(request, "app/deploy_history.html", {"deploy_history": q})

@@ -17,5 +17,5 @@ urlpatterns = [
     path("cluster_list", cluster_list, name="cluster_list"),
     path("delete_app/<str:pk>", delete_app, name="delete_app"),
     path("appinfo_deploy/<str:pk>", deploy_app, name="appinfo_deploy"),
-    path("appinfo_history/", history_app, name="appinfo_history"),
+    path("appinfo_history/<str:q>", history_app, name="appinfo_history"),
 ]
