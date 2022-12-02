@@ -31,6 +31,9 @@ class DeployForm(forms.ModelForm):
             "deploy_type",
         ]
         widgets = {
-            #'deploy_type': forms.RadioSelect,
-            'deploy_type': forms.Select,
+            'deploy_type': forms.RadioSelect,
+            #'deploy_type': forms.Select,
         }
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #     self.fields['deploy_type'].widget.choices.pop(0)

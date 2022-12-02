@@ -47,7 +47,7 @@ class AppDeployHistory(models.Model):
 
     app_name = models.ForeignKey(AppInfo, on_delete=models.RESTRICT)
     revision = models.CharField(max_length=100)
-    deploy_type = models.CharField(max_length=20, choices=MY_CHOICES)
+    deploy_type = models.CharField(max_length=20, choices=MY_CHOICES, default="RollingUpdate")
     user = models.CharField(max_length=100)
     manager_user = models.CharField(max_length=100)
     insert_at = models.DateTimeField(auto_now_add=True)

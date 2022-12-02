@@ -132,9 +132,14 @@ def deploy_app(request, pk):
         deploy.user = request.user.id
         deploy.manager_user = request.user.id
         deploy.save()
-        return redirect("/")
+        return redirect("deploy_settings")
 
     return render(request, "app/app_deploy.html", {"form": form})
+
+@login_required
+def deploy_settings(request):
+    #qs = AppDeployHistory.objects.all()
+    return render(request, "app/deploy_type.html")
 
 # !!
 @login_required

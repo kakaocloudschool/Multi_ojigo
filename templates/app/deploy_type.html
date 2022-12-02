@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
-{% block content %}
+{% load django_bootstrap5 %}
 
-{% load static %}
+{% block content %}
 
     <!-- Page Wrapper -->
     <div id="wrapper">
@@ -37,26 +37,29 @@
                                         placeholder="app_name" name="appname" value="">
                                 </div>
 
+                                {% bootstrap_form form %}
+                                    <button class="btn btn-primary dropdown-toggle" type="button"
+                                        id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true"
+                                        aria-expanded="false" style="color: lightslategray; background-color:white; border-color:lightgray; width:150px;">
+                                        ---------
+                                    </button>
+                                    <div class="dropdown-menu animated--fade-in"
+                                        aria-labelledby="dropdownMenuButton">
+                                        {% bootstrap_form form %}
+<!--                                        {% for choice in form.deploy_type %}-->
+<!--                                            <a class="dropdown-item" href="#" id='choice_{{ forloop.counter }}' name='choice' data-value="{{ choice.id }}" onclick='change_{{ forloop.counter }}()'>{{ choice }}</a>-->
 
+<!--                                            <script>-->
+<!--                                                change_{{ forloop.counter }}()  {-->
+<!--                                                    const btnElement = document.getElementById('dropdownMenuButton');-->
+<!--                                                    const deploy_type = document.getElementById('choice_{{ forloop.counter }}').getAttribute('data-value');-->
+<!--                                                    btnElement.innerText = deploy_type;-->
+<!--                                                }-->
+<!--                                            </script>-->
 
-                                <!--radiobutton-->
-                                <fieldset>
-                                    {% for choice in question.choice_set.all %}
-                                    <div class="custom-control custom-checkbox small">
-                                        <input type="radio" class="custom-control-input" id="rolling" name="distradio" data-value="rollingupdate" checked="checked"/>
-                                        <label class="custom-control-label" for="rolling">RollingUpdate</label>
+<!--                                        {% endfor %}-->
                                     </div>
-                                    <div class="custom-control custom-checkbox small">
-                                        <input type="radio" class="custom-control-input" id="bluegreen" name="distradio" data-value="bluegreen" />
-                                        <label class="custom-control-label" for="bluegreen">BlueGreen</label>
-                                    </div>
-                                    <div class="custom-control custom-checkbox small" >
-                                        <input type="radio" class="custom-control-input" id="canary" name="distradio" data-value="canary" />
-                                        <label class="custom-control-label" for="canary">Canary</label>
-                                    </div>
-                                    {% endfor %}
 
-                                </fieldset>
 
 
                                 <div class="mb-4" >

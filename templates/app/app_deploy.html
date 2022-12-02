@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
+{% load django_bootstrap5 %}
+
 {% block content %}
 
-{% load static %}
 
     <!-- Page Wrapper -->
     <div id="wrapper">
@@ -28,39 +29,27 @@
                         </div>
                         <div class="card-body">
 
-                            <form action="{% url 'appinfo_deploy1' %}" method="post">
+                            <form action="" method="post">
                                 {% csrf_token %}
 
 
-                                <div class="dropdown mb-4" >
-                                    <p style="width: 160px; float:left; margin-right: 10px;">배포 방식 : </p>
-                                    <button class="btn btn-primary dropdown-toggle" type="button"
-                                        id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true"
-                                        aria-expanded="false" style="color: lightslategray; background-color:white; border-color:lightgray; width:150px;">
-                                        배포 방식
-                                    </button>
-                                    <div class="dropdown-menu animated--fade-in"
-                                        aria-labelledby="dropdownMenuButton">
-                                        {% for choice in form.deploy_type %}
-                                            <a class="dropdown-item" href="#" id='choice_{{ forloop.counter }}' name='choice' data-value="{{ choice.id }}" onclick='change_{{ forloop.counter }}()'>{{ choice }}</a>
+                                <!--radiobutton-->
 
-                                            <script>
-                                                change_{{ forloop.counter }}()  {
-                                                    const btnElement = document.getElementById('dropdownMenuButton');
-                                                    const deploy_type = document.getElementById('choice_{{ forloop.counter }}').getAttribute('data-value');
-                                                    btnElement.innerText = deploy_type;
-                                                }
-                                            </script>
+                                {% bootstrap_form form %}
+                                <hr/>
 
-                                        {% endfor %}
-                                    </div>
-                                </div>
+                                <a href="{% url 'app_list' %}" class="btn btn-primary" style="float:right; margin-right:15px;">
+                                    <span class="icon text-white-50">
+                                    </span>
+                                    <span class="text">돌아가기</span>
+                                </a>
 
-                                <a type="submit" href="#" class="btn btn-primary" style="float:right; margin-right:15px;">
+                                <button class="btn btn-primary" style="float:right; margin-right:15px;">
                                     <span class="icon text-white-50">
                                     </span>
                                     <span class="text">배포</span>
-                                </a>
+                                </button>
+
                                 
                             </form>
 
@@ -113,9 +102,5 @@
             </div>
         </div>
     </div>
-
-
-
-
 
 {% endblock %}
