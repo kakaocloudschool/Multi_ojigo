@@ -20,7 +20,7 @@ class Cluster(models.Model):
 class AppInfo(models.Model):
     app_name = models.CharField(max_length=100, primary_key=True, verbose_name="APP 이름")
     cluster_name = models.ForeignKey(
-        Cluster, on_delete=models.RESTRICT, verbose_name="클러스터 이름"
+        Cluster, on_delete=models.CASCADE, verbose_name="클러스터 이름"
     )
     auto_create_ns = models.BooleanField(default=False, verbose_name="네임스페이스 생성")
     namespace = models.CharField(max_length=100, verbose_name="네임스페이스")
@@ -36,15 +36,29 @@ class AppInfo(models.Model):
         return self.app_name
 
 
+class AppDeployRevision(models.Model):
+    app_name = models.ForeignKey(AppInfo, on_delete=models.CASCADE)
+    deploy_type = models.CharField(max_length=20)
+    cluster_name = models.CharField(max_length=100)
+    cluster_url = models.TextField()
+    cluster_token = models.TextField()
+    namespace = models.CharField(max_length=100)
+    deployment = models.CharField(max_length=100)
+    container = models.CharField(max_length=100)
+    tag = models.CharField(max_length=100)
+    step = models.CharField(max_length=30)
+    insert_at = models.DateTimeField(auto_now_add=True)
+    update_at = models.DateTimeField(auto_now=True)
+
+
 class AppDeployHistory(models.Model):
     MY_CHOICES = (  # 각 튜플의 첫 번째 요소는 DB에 저장할 실제 값이고, 두 번째 요소는 display 용 이름이다.
         ("RollingUpdate", "롤링 업데이트 배포"),
         ("BlueGreen", "블루그린 배포"),
         ("Canary", "카나리 배포"),
     )
-
-    app_name = models.ForeignKey(AppInfo, on_delete=models.RESTRICT)
     revision = models.CharField(max_length=100)
+    app_name = models.ForeignKey(AppInfo, on_delete=models.RESTRICT)
     deploy_type = models.CharField(
         max_length=20, choices=MY_CHOICES, default="RollingUpdate"
     )
