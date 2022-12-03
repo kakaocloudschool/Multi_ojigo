@@ -3,7 +3,7 @@
 
 {% block content %}
     <div class="container-fluid">
-        <form method="post" >
+        <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             {% bootstrap_form form %}
                 <button class="btn btn-primary">저장</button>

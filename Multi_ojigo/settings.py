@@ -110,7 +110,7 @@ DATABASES = {
         "NAME": "argocd",
         "USER": "root",
         "PASSWORD": "test123",
-        "HOST": "127.0.0.1",
+        "HOST": "192.168.50.106",
         "PORT": "3306",
         "OPTIONS": {"init_command": 'SET sql_mode="STRICT_TRANS_TABLES"'},
     }

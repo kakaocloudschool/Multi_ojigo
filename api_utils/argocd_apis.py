@@ -120,6 +120,7 @@ def create_argocd_app(
     }
     resp = requests.post(url, headers=headers, data=json.dumps(data), verify=False)
     if resp.status_code not in (200, 201):
+        print(resp.status_code, resp.text)
         return -1, "앱 등록 정보가 불일치 하거나, 이미 등록된 정보 입니다."
     return 1, "앱 등록이 완료 되었습니다."
 
@@ -186,6 +187,7 @@ def del_argocd_app(app_name):
     if resp.status_code == 200:
         return True
     else:
+        print(resp.text)
         return False
 
 
