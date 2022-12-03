@@ -265,8 +265,6 @@ def get_kubernetes_deployment(
     headers["Authorization"] = f"Bearer {cluster_token}"
     resp = requests.get(url, headers=headers, verify=False)
     deploy = {}
-    print(resp)
-    print(url)
     if resp.status_code not in (200, 201):
         return -1, "디플로이먼트 조회 실패", deploy
     json_resp = resp.json()
@@ -333,6 +331,8 @@ def get_app_deploy_and_service_info(cluster_url, cluster_token, app_name):
     deploy_info_dict = {}
     svc_dict = {}
 
+    is_have_deployment = False
+
     for namespace, deployments in name_deploy_dict.items():
         for deployment in deployments:
             result_code, msg, deploy = get_kubernetes_deployment(
@@ -341,9 +341,13 @@ def get_app_deploy_and_service_info(cluster_url, cluster_token, app_name):
                 namespace=namespace,
                 deployment=deployment,
             )
-            deploy_info_dict[deployment] = deploy
             if result_code != 1:
-                return -1, msg, {}, {}
+                continue
+            if deploy["replicas"] != 0:
+                deploy_info_dict[deployment] = deploy
+                is_have_deployment = True
+    if not is_have_deployment:
+        return -1, "디플로이먼트가 존재하지 않거나, 조회에 실패하였습니다. ", {}, {}
 
     for namespace, services in service_dict.items():
         for service in services:

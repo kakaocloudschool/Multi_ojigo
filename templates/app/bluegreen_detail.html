@@ -47,19 +47,27 @@
                                     <br>
                                 </div>
                                 <hr/>
-                                <button class="btn btn-primary" name="deploy">신규 버전 배포</button>
-                                <button class="btn btn-primary" name="change">신규 버전 전환</button>
-                                <button class="btn btn-primary" name="apply">적용</button>
-                                <button class="btn btn-primary" name="rollback">롤백</button>
+                                {% if appdeployrevision.step == "START"%}
+                                    <button class="btn btn-primary" name="deploy">신규 버전 배포</button>
+                                {% else %}
+                                    <button class="btn btn-primary" name="deploy" disabled>신규 버전 배포</button>
+                                {% endif %}
+                                {% if appdeployrevision.step == "DEPLOY"%}
+                                    <button class="btn btn-primary" name="change">신규 버전 전환</button>
+                                {% else %}
+                                    <button class="btn btn-primary" name="change" disabled>신규 버전 전환</button>
+                                {% endif %}
+                                {% if appdeployrevision.step == "CHANGE"%}
+                                    <button class="btn btn-primary" name="apply">적용</button>
+                                {% else %}
+                                    <button class="btn btn-primary" name="apply" disabled>적용</button>
+                                {% endif %}
+                                <button class="btn btn-primary" name="rollback"> 롤백 / 신규 버전 배포 취소</button>
+
                                 <a href="{% url 'app_list' %}" class="btn btn-danger" style="float:right;" >
                                     <span class="icon text-white-50">
                                     </span>
                                     <span class="text">나가기</span>
-                                </a>
-                                <a href="#" class="btn btn-primary" style="float:right; margin-right:15px;" onclick="history.go(-1)">
-                                    <span class="icon text-white-50">
-                                    </span>
-                                    <span class="text">돌아가기</span>
                                 </a>
                             </form>
                             
