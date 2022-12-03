@@ -13,12 +13,7 @@ from api_utils.argocd_apis import (
     post_rolling_update_sync,
 )
 from api_utils.kubernetes_apis import parsing_kube_confing
-from .forms import (
-    ClusterForm,
-    AppInfoForm,
-    DeployForm,
-    DeployMethodForm
-)
+from .forms import ClusterForm, AppInfoForm, DeployForm, DeployMethodForm
 from .models import AppInfo, Cluster, AppDeployHistory, AppDeployRevision
 
 ARGOCD_URL = getattr(settings, "ARGOCD_URL", None)
@@ -138,9 +133,7 @@ def deploy_app(request, pk):
         elif form.cleaned_data["deploy_type"] == "BlueGreen":
             return redirect("bluegreen", pk=appinfo.app_name)
         elif form.cleaned_data["deploy_type"] == "Canary":
-            return render(
-                request, "app/canary.html", { "appinfo": appinfo}
-            )
+            return render(request, "app/canary.html", {"appinfo": appinfo})
 
     return render(request, "app/app_deploy.html", {"form": form})
 
