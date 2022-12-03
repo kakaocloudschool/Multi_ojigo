@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import AppInfo, Cluster, AppDeployHistory
+from .models import AppInfo, Cluster, AppDeployHistory, AppDeployRevision
+
 
 # Register your models here.
 @admin.register(AppInfo)
@@ -13,5 +14,10 @@ class ClusterAdmin(admin.ModelAdmin):
 
 
 @admin.register(AppDeployHistory)
-class ClusterAdmin(admin.ModelAdmin):
+class AppDeployHistoryAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(AppDeployRevision)
+class AppDeployRevisionAdmin(admin.ModelAdmin):
     pass

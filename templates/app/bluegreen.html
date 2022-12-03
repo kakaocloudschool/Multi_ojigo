@@ -18,20 +18,18 @@
                 <div class="container-fluid"><br/>
 
                     <!-- Page Heading -->
-                    <h1 class="h3 mb-2 text-gray-800">Rolling Update</h1>
-
+                    <h1 class="h3 mb-2 text-gray-800">BlueGreen</h1>
+                    
 
                     <!-- DataTales Example -->
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary" style="float:left; margin-right: 10px;">{{appinfo.app_name}}</h6>
-                            <label style="height: 10px; float:right; margin-right: 10px;">
-                                NAMESPACE : {{appinfo.namespace}} </label>
+                            <h6 class="m-0 font-weight-bold text-primary" style="float:left; margin-right: 10px;">APP : {{ app_name }}</h6>
+                            <label style="height: 10px; float:right; margin-right: 10px;">NameSpace [ {{ namespace }} ]</label>
                         </div>
                         <div class="card-body">
 
-<!---->
-<!--                                게이지 차는 뷰-->
+                            <!--                                게이지 차는 뷰-->
                             <div id="toc-content" >
                                 <label>배포 진행률</label>
                                 <meter min="0" value="50" max="100"></meter>
@@ -54,6 +52,33 @@
 
                             <form method="POST" id='form'>
                                 {% csrf_token %}
+                                <div class="mb-4 w-25" style="float:left; margin-right:25px;" >
+                                    <select id="deployment" name="deployment" class="form-control">
+                                        <option hidden selected value="" id="nulldeployment">Deployment</option>
+                                        {% for deployment in deploy_info %}
+                                            <option value="{{ deployment }}">{{ deployment }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="mb-4 w-50" style="float:left; margin-right:25px;" >
+                                    <select id="container" name="container" class="form-control">
+                                        <option hidden selected value="" id="nullcontainer">Container</option>
+                                        {% for container in container_info %}
+                                            <option value="{{ container.image }}" parent="{{ container.deploy }}">{{ container.image }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="mb-4 " >
+                                    <input type="text" class="form-control form-control-user" style="float:left; margin-right:5px; width:150px; text-align:right;" id="version"
+                                        placeholder="Version 입력" name="version" value="">
+
+                                    <button class="btn btn-primary" name="target">저장</button>
+
+                                </div>
+                                <hr/>
+
+                            <form method="POST" id='form'>
+                                {% csrf_token %}
 
 
                                 <button type="submit" name="rolling_deploy" class="btn btn-primary" onclick="openCloseToc()">최신버전 배포하기</button>
@@ -62,10 +87,13 @@
                                     </span>
                                     <span class="text">나가기</span>
                                 </a>
-
-
+                                <a href="#" class="btn btn-primary" style="float:right; margin-right:15px;" onclick="history.go(-1)">
+                                    <span class="icon text-white-50">
+                                    </span>
+                                    <span class="text">돌아가기</span>
+                                </a>
                             </form>
-
+                            
                         </div>
                     </div>
 
@@ -80,11 +108,24 @@
 
     </div>
     <!-- End of Page Wrapper -->
-
-    <script>
-        function openCloseToc() {
-            document.getElementById('toc-content').style.display = 'block';
-        }
-    </script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
+    var document = window.document;
+    $(document).ready(function(){
+        var $deploymentvar=$("#deployment");
+        var $containervar=$("#container");
+        var $containeroptions=$containervar.find('option');
+        $containervar.html($containeroptions.filter('[value=""]'));
+        $deploymentvar.on('change',function(){
+            $containervar.html($containeroptions.filter('[parent="'+this.value+'"],[value=""]'));
+            $('#container option[value=""]').prop('selected', true);
+        });
+    });
+</script>
+<script>
+    function openCloseToc() {
+        document.getElementById('toc-content').style.display = 'block';
+    }
+</script>
 
 {% endblock %}
