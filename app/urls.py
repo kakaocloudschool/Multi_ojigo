@@ -10,6 +10,7 @@ from .views import (
     test_web,
     bluegreen,
     rollingupdate,
+    bluegreen_detail,
 )
 
 urlpatterns = [
@@ -20,6 +21,11 @@ urlpatterns = [
     path("delete_app/<str:pk>", delete_app, name="delete_app"),
     path("appinfo_deploy/<str:pk>", deploy_app, name="appinfo_deploy"),
     path("appinfo_deploy/<str:pk>/bluegreen", bluegreen, name="bluegreen"),
+    path(
+        "appinfo_deploy/<str:app_name>/bluegreen/<int:pk>",
+        bluegreen_detail,
+        name="bluegreen_detail",
+    ),
     path("appinfo_deploy/<str:pk>/rollingupdate", rollingupdate, name="rollingupdate"),
     path("appinfo_history/<str:q>", history_app, name="appinfo_history"),
     # path("test_web", test_web, name="test_web"),

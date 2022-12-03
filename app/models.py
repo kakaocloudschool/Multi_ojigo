@@ -37,7 +37,7 @@ class AppInfo(models.Model):
 
 
 class AppDeployRevision(models.Model):
-    app_name = models.ForeignKey(AppInfo, on_delete=models.CASCADE)
+    app_name = models.CharField(max_length=100)
     deploy_type = models.CharField(max_length=20)
     cluster_name = models.CharField(max_length=100)
     cluster_url = models.TextField()
@@ -47,8 +47,6 @@ class AppDeployRevision(models.Model):
     container = models.CharField(max_length=100)
     tag = models.CharField(max_length=100)
     step = models.CharField(max_length=30)
-    insert_at = models.DateTimeField(auto_now_add=True)
-    update_at = models.DateTimeField(auto_now=True)
 
 
 class AppDeployHistory(models.Model):

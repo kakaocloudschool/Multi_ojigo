@@ -360,6 +360,36 @@ def get_app_deploy_and_service_info(cluster_url, cluster_token, app_name):
     return 1, "서비스 조회 성공", deploy_info_dict, svc_dict
 
 
+def get_app_service_info(cluster_url, cluster_token, app_name):
+    resp = get_argocd_token(ARGOCD_URL, ARGOCD_USERNAME, ARGOCD_PASSWORD)
+    argo_bearer_token = ""
+    # 토큰 발급 실패면, 에러 팝업
+    if resp.status_code in (200, 201):
+        argo_bearer_token = resp.json()["token"]
+    else:
+        print(resp.status_code, resp.text)
+        return -1, "argo 토큰 발급 실패", {}, {}
+    name_deploy_dict, service_dict = get_argo_service_deployment_name(
+        ARGOCD_URL, argo_bearer_token, app_name
+    )
+    deploy_info_dict = {}
+    svc_dict = {}
+
+    for namespace, services in service_dict.items():
+        for service in services:
+            result_code, msg, svc = get_kubernetes_service(
+                cluster_url=cluster_url,
+                cluster_token=cluster_token,
+                namespace=namespace,
+                service=service,
+            )
+            svc_dict[service] = svc
+            if result_code != 1:
+                return -1, msg, {}, {}
+
+    return 1, "서비스 조회 성공", deploy_info_dict, svc_dict
+
+
 def create_deployment_bluegreen(
     cluster_url, cluster_token, deploy_name, namespace, image, replicas, labels
 ):

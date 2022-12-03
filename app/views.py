@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.db.models import Max
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.conf import settings
@@ -12,8 +13,13 @@ from api_utils.argocd_apis import (
     post_rolling_update_sync,
 )
 from api_utils.kubernetes_apis import parsing_kube_confing
-from .forms import ClusterForm, AppInfoForm, DeployForm, DeployMethodForm
-from .models import AppInfo, Cluster, AppDeployHistory
+from .forms import (
+    ClusterForm,
+    AppInfoForm,
+    DeployForm,
+    DeployMethodForm
+)
+from .models import AppInfo, Cluster, AppDeployHistory, AppDeployRevision
 
 ARGOCD_URL = getattr(settings, "ARGOCD_URL", None)
 ARGOCD_USERNAME = getattr(settings, "ARGOCD_USERNAME", None)
@@ -127,20 +133,13 @@ def deploy_app(request, pk):
     form = DeployForm(request.POST)  # form 정보 가져옴
 
     if form.is_valid():
-        deploy = AppDeployHistory()  # model 정보 가져옴
-        deploy.app_name = appinfo
-        deploy.revision = appinfo.target_revision
-        deploy.deploy_type = form.cleaned_data["deploy_type"]
-        deploy.user = request.user.id
-        deploy.manager_user = request.user.id
-        deploy.save()
-        if deploy.deploy_type == "RollingUpdate":
-            return redirect("rollingupdate", pk=deploy.app_name)
-        elif deploy.deploy_type == "BlueGreen":
-            return redirect("bluegreen", pk=deploy.app_name)
-        elif deploy.deploy_type == "Canary":
+        if form.cleaned_data["deploy_type"] == "RollingUpdate":
+            return redirect("rollingupdate", pk=appinfo.app_name)
+        elif form.cleaned_data["deploy_type"] == "BlueGreen":
+            return redirect("bluegreen", pk=appinfo.app_name)
+        elif form.cleaned_data["deploy_type"] == "Canary":
             return render(
-                request, "app/canary.html", {"deploy": deploy, "appinfo": appinfo}
+                request, "app/canary.html", { "appinfo": appinfo}
             )
 
     return render(request, "app/app_deploy.html", {"form": form})
@@ -168,30 +167,61 @@ def rollingupdate(request, pk):
 
 
 @login_required
+def bluegreen_detail(request, pk, app_name):
+    appdeployrevision = get_object_or_404(AppDeployRevision, pk=pk, app_name=app_name)
+    if request.method == "POST":
+        if "deploy" in request.POST:
+
+            appdeployrevision.step = "deploy"
+        elif "change" in request.POST:
+            print("신규 버전 전환")
+        elif "apply" in request.POST:
+            print("적용")
+        elif "rollback" in request.POST:
+            print("롤백")
+
+    return render(
+        request,
+        "app/bluegreen_detail.html",
+        {"appdeployrevision": appdeployrevision},
+    )
+
+
+@login_required
 def bluegreen(request, pk):
     appinfo = get_object_or_404(AppInfo, pk=pk)
     cluster = Cluster.objects.get(cluster_name=appinfo.cluster_name)
     if request.method == "POST":
-        form = DeployMethodForm(request.POST)
-        form.cluster_url = cluster.cluster_url
-        form.cluster_token = cluster.bearer_token
-        form.app_name = appinfo.app_name
-        form.namespace = appinfo.namespace
-        form.deployment = request.POST["deployment"]
-        form.container = request.POST["container"]
-        form.tag = request.POST["version"]
-        form.type = "bluegreen"
-        print(form.deployment)
-        if form.is_valid():
-            print("valid")
+        app_revision = AppDeployRevision()
+        app_revision.app_name = appinfo.app_name
+        app_revision.deploy_type = "bluegreen"
+        app_revision.cluster_name = cluster.cluster_name
+        app_revision.cluster_url = cluster.cluster_url
+        app_revision.cluster_token = cluster.bearer_token
+        app_revision.namespace = appinfo.namespace
+        app_revision.deployment = request.POST["deployment"]
+        app_revision.container = request.POST["container"]
+        app_revision.tag = request.POST["version"]
+        app_revision.step = "SELECT"
+        if app_revision.tag is None or len(app_revision.tag.strip()) == 0:
+            print("isnone")
+        else:
+            app_revision.save()
+            revision = AppDeployRevision.objects.filter(
+                app_name=str(app_revision.app_name)
+            )
+            revision_pk = revision.aggregate(Max("pk"))["pk__max"]
+            return redirect(
+                "bluegreen_detail", pk=revision_pk, app_name=appinfo.app_name
+            )
 
-    else:
-        form = DeployMethodForm()
-        form.cluster_url = cluster.cluster_url
-        form.cluster_token = cluster.bearer_token
-        form.app_name = appinfo.app_name
-        form.namespace = appinfo.namespace
-        form.type = "bluegreen"
+    form = DeployMethodForm()
+    form.cluster_url = cluster.cluster_url
+    form.cluster_token = cluster.bearer_token
+    form.app_name = appinfo.app_name
+
+    form.namespace = appinfo.namespace
+    form.type = "bluegreen"
     result_code, msg, deploy_info_dict, svc_dict = get_app_deploy_and_service_info(
         cluster_url=form.cluster_url,
         cluster_token=form.cluster_token,

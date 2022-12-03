@@ -24,8 +24,8 @@
                     <!-- DataTales Example -->
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary" style="float:left; margin-right: 10px;">APP : {{ app_name }}</h6>
-                            <label style="height: 10px; float:right; margin-right: 10px;">NameSpace [ {{ namespace }} ]</label>
+                            <h6 class="m-0 font-weight-bold text-primary" style="float:left; margin-right: 10px;">APP : {{ appdeployrevision.app_name }}</h6>
+                            <label style="height: 10px; float:right; margin-right: 10px;">NameSpace [ {{ appdeployrevision.namespace }} ]</label>
                         </div>
                         <div class="card-body">
 
@@ -33,30 +33,24 @@
                                 {% csrf_token %}
                                 <div class="mb-4 w-25" style="float:left; margin-right:25px;" >
                                     <select id="deployment" name="deployment" class="form-control">
-                                        <option hidden selected value="" id="nulldeployment">Deployment</option>
-                                        {% for deployment in deploy_info %}
-                                            <option value="{{ deployment }}">{{ deployment }}</option>
-                                        {% endfor %}
+                                        <option selected value="{{ appdeployrevision.deployment }}">{{ appdeployrevision.deployment }}</option>
                                     </select>
                                 </div>
                                 <div class="mb-4 w-50" style="float:left; margin-right:25px;" >
                                     <select id="container" name="container" class="form-control">
-                                        <option hidden selected value="" id="nullcontainer">Container</option>
-                                        {% for container in container_info %}
-                                            <option value="{{ container.image }}" parent="{{ container.deploy }}">{{ container.image }}</option>
-                                        {% endfor %}
+                                        <option selected value="{{ appdeployrevision.container }}">{{ appdeployrevision.container }}</option>
                                     </select>
                                 </div>
-                                <div class="mb-4 " >
+                                <div class="mb-4" >
                                     <input type="text" class="form-control form-control-user" style="float:left; margin-right:5px; width:150px; text-align:right;" id="version"
-                                        placeholder="Version 입력" name="version" value="">
-                                    <a class="btn btn-primary" type="target" >
-                                        <span class="icon text-white-50">
-                                        </span>
-                                        <button class="btn btn-primary" name="target">저장</button>
-                                    </a>
+                                        placeholder="Version 입력" name="version" value="{{ appdeployrevision.tag }}"readonly>
+                                    <br>
                                 </div>
                                 <hr/>
+                                <button class="btn btn-primary" name="deploy">신규 버전 배포</button>
+                                <button class="btn btn-primary" name="change">신규 버전 전환</button>
+                                <button class="btn btn-primary" name="apply">적용</button>
+                                <button class="btn btn-primary" name="rollback">롤백</button>
                                 <a href="{% url 'app_list' %}" class="btn btn-danger" style="float:right;" >
                                     <span class="icon text-white-50">
                                     </span>
@@ -83,19 +77,4 @@
 
     </div>
     <!-- End of Page Wrapper -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script>
-    var document = window.document;
-    $(document).ready(function(){
-        var $deploymentvar=$("#deployment");
-        var $containervar=$("#container");
-        var $containeroptions=$containervar.find('option');
-        $containervar.html($containeroptions.filter('[value=""]'));
-        $deploymentvar.on('change',function(){
-            $containervar.html($containeroptions.filter('[parent="'+this.value+'"],[value=""]'));
-            $('#container option[value=""]').prop('selected', true);
-        });
-    });
-</script>
-
 {% endblock %}

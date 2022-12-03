@@ -1,5 +1,5 @@
 from django import forms
-from .models import AppInfo, Cluster, AppDeployHistory
+from .models import AppInfo, Cluster, AppDeployHistory, AppDeployRevision
 
 
 class DeployMethodForm(forms.Form):
@@ -13,6 +13,12 @@ class DeployMethodForm(forms.Form):
     tag = forms.CharField(label="tag", max_length=20)
     type = forms.CharField(max_length=10)
     replicaset = forms.IntegerField(initial=0)
+
+
+class AppDeployRevisionForm(forms.ModelForm):
+    class Meta:
+        model = AppDeployRevision
+        fields = "__all__"
 
 
 class AppInfoForm(forms.ModelForm):
