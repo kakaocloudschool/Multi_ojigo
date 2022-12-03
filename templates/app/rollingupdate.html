@@ -56,21 +56,17 @@
                                 {% csrf_token %}
 
 
-                                <button type="submit"  name="rolling_deploy" class="btn btn-primary">최신버전 배포하기</button>
+                                <button type="submit" name="rolling_deploy" class="btn btn-primary" onclick="openCloseToc()">최신버전 배포하기</button>
                                 <a href="{% url 'app_list' %}" class="btn btn-danger" style="float:right;" >
                                     <span class="icon text-white-50">
                                     </span>
                                     <span class="text">나가기</span>
                                 </a>
-                                <a href="#" class="btn btn-primary" style="float:right; margin-right:15px;" onclick="history.go(-1)">
-                                    <span class="icon text-white-50">
-                                    </span>
-                                    <span class="text">돌아가기</span>
-                                </a>
 
-                                
+
+
                             </form>
-                            
+
                         </div>
                     </div>
 

@@ -18,78 +18,54 @@
                 <div class="container-fluid"><br/>
 
                     <!-- Page Heading -->
-                    <h1 class="h3 mb-2 text-gray-800">BlueGreen</h1>
-                    
+                    <h1 class="h3 mb-2 text-gray-800">Rolling Update</h1>
+
 
                     <!-- DataTales Example -->
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary" style="float:left; margin-right: 10px;">APP : {{ app_name }}</h6>
-                            <label style="height: 10px; float:right; margin-right: 10px;">NameSpace [ {{ namespace }} ]</label>
+                            <h6 class="m-0 font-weight-bold text-primary" style="float:left; margin-right: 10px;">{{appinfo.app_name}}</h6>
+                            <label style="height: 10px; float:right; margin-right: 10px;">
+                                NAMESPACE : {{appinfo.namespace}} </label>
                         </div>
                         <div class="card-body">
 
+<!---->
+<!--                                게이지 차는 뷰-->
+                            <div id="toc-content" >
+                                <label>배포 진행률</label>
+                                <meter min="0" value="50" max="100"></meter>
+                                <!-- 전체 크기 1을 기준으로 0.8만큼 차지합니다. -->
+
+<!--                                <label>사용량 64% </label>-->
+<!--                                <meter min="0" max="100" value="64"></meter>-->
+<!--                                &lt;!&ndash; 전체 100 중에서 64만큼 차지합니다. &ndash;&gt;-->
+
+<!--                                <label>트래픽 초과 </label>-->
+<!--                                <meter min="1024" max="10240" low="2048" high="8192" value="9216"></meter>-->
+<!--                                &lt;!&ndash; 전체크기는 1024~10240인데 높다고 설정한 8192보다 현재 값 9216이 더 큽니다. &ndash;&gt;-->
+
+<!--                                <label>적절한 트래픽 </label>-->
+<!--                                <meter value="0.5" optimum="0.8"></meter>-->
+<!--                                &lt;!&ndash; 전체 1 중에서 현재 0.5를 차지하고 있으며 적정도를 0.8로 설정했습니다. &ndash;&gt;-->
+<!--                                여기까지 -->
+                            </div>
+                            <hr/>
+
                             <form method="POST" id='form'>
                                 {% csrf_token %}
-                                <div class="mb-4 w-25" style="float:left; margin-right:25px;" >
-                                    <select id="deployment" name="deployment" class="form-control">
-                                        <option hidden selected value="" id="nulldeployment">Deployment</option>
-                                        {% for deployment in deploy_info %}
-                                            <option value="{{ deployment }}">{{ deployment }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <div class="mb-4 w-50" style="float:left; margin-right:25px;" >
-                                    <select id="container" name="container" class="form-control">
-                                        <option hidden selected value="" id="nullcontainer">Container</option>
-                                        {% for container in container_info %}
-                                            <option value="{{ container.image }}" parent="{{ container.deploy }}">{{ container.image }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <div class="mb-4 " >
-                                    <input type="text" class="form-control form-control-user" style="float:left; margin-right:5px; width:150px; text-align:right;" id="version"
-                                        placeholder="Version 입력" name="version" value="">
 
-                                        <span class="icon text-white-50">
-                                        </span>
-                                        <button class="btn btn-primary" name="target">저장</button>
 
-                                </div>
-                                <hr/>
-
-                                <a class="btn btn-primary" style="float:left; margin-right:15px;" type="reset">
-                                    <span class="icon text-white-50">
-                                    </span>
-                                    <span class="text">신규 버전 배포</span>
-                                </a>
-                                <a href="#" class="btn btn-primary" style="float:left; margin-right:15px;" type="reset" onclick='return chk_form(); self.close();'>
-                                    <span class="icon text-white-50">
-                                    </span>
-                                    <span class="text">버전 전환</span>
-                                </a>
-                                <a href="#" class="btn btn-success" style="float:left; margin-right:15px;" type="reset" onclick='return chk_form(); self.close();'>
-                                    <span class="icon text-white-50">
-                                    </span>
-                                    <span class="text">적용</span>
-                                </a> <!-- 모달or 메시지박스로 "완전적용됩니다 진행하시겠습니까" -->
-                                <a href="#" class="btn btn-primary" style="float:left; margin-right:15px;" type="reset" onclick='return chk_form(); self.close();'>
-                                    <span class="icon text-white-50">
-                                    </span>
-                                    <span class="text">롤백</span>
-                                </a>
+                                <button type="submit" name="rolling_deploy" class="btn btn-primary" onclick="openCloseToc()">최신버전 배포하기</button>
                                 <a href="{% url 'app_list' %}" class="btn btn-danger" style="float:right;" >
                                     <span class="icon text-white-50">
                                     </span>
                                     <span class="text">나가기</span>
                                 </a>
-                                <a href="#" class="btn btn-primary" style="float:right; margin-right:15px;" onclick="history.go(-1)">
-                                    <span class="icon text-white-50">
-                                    </span>
-                                    <span class="text">돌아가기</span>
-                                </a>
+
+
                             </form>
-                            
+
                         </div>
                     </div>
 
@@ -104,19 +80,11 @@
 
     </div>
     <!-- End of Page Wrapper -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script>
-    var document = window.document;
-    $(document).ready(function(){
-        var $deploymentvar=$("#deployment");
-        var $containervar=$("#container");
-        var $containeroptions=$containervar.find('option');
-        $containervar.html($containeroptions.filter('[value=""]'));
-        $deploymentvar.on('change',function(){
-            $containervar.html($containeroptions.filter('[parent="'+this.value+'"],[value=""]'));
-            $('#container option[value=""]').prop('selected', true);
-        });
-    });
-</script>
+
+    <script>
+        function openCloseToc() {
+            document.getElementById('toc-content').style.display = 'block';
+        }
+    </script>
 
 {% endblock %}
