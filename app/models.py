@@ -46,6 +46,9 @@ class AppDeployRevision(models.Model):
     deployment = models.CharField(max_length=100)
     container = models.CharField(max_length=100)
     tag = models.CharField(max_length=100)
+    before_color = models.CharField(max_length=10, null=True)
+    change_color = models.CharField(max_length=10, null=True)
+    target_service = models.CharField(max_length=100, null=True)
     step = models.CharField(max_length=30)
 
 

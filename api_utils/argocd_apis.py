@@ -296,7 +296,7 @@ def get_kubernetes_service(
     service_dic["name"] = service
     service_dic["namespace"] = namespace
     service_dic["cluster_url"] = cluster_url
-    service_dic["labels"] = json_resp["metadata"]["labels"]
+    service_dic["labels"] = json_resp["spec"]["selector"]
     return 1, "서비스 조회 성공", service_dic
 
 
@@ -360,7 +360,9 @@ def get_app_deploy_and_service_info(cluster_url, cluster_token, app_name):
     return 1, "서비스 조회 성공", deploy_info_dict, svc_dict
 
 
-def get_app_service_info(cluster_url, cluster_token, app_name):
+def get_app_deployment_service_info(
+    cluster_url, cluster_token, app_name, namespace, target_deployment
+):
     resp = get_argocd_token(ARGOCD_URL, ARGOCD_USERNAME, ARGOCD_PASSWORD)
     argo_bearer_token = ""
     # 토큰 발급 실패면, 에러 팝업
@@ -368,12 +370,19 @@ def get_app_service_info(cluster_url, cluster_token, app_name):
         argo_bearer_token = resp.json()["token"]
     else:
         print(resp.status_code, resp.text)
-        return -1, "argo 토큰 발급 실패", {}, {}
+        return -1, "argo 토큰 발급 실패", ""
     name_deploy_dict, service_dict = get_argo_service_deployment_name(
         ARGOCD_URL, argo_bearer_token, app_name
     )
-    deploy_info_dict = {}
     svc_dict = {}
+    result_code, msg, deploy = get_kubernetes_deployment(
+        cluster_url=cluster_url,
+        cluster_token=cluster_token,
+        namespace=namespace,
+        deployment=target_deployment,
+    )
+    taget_labels = deploy["labels"]
+    print(taget_labels)
 
     for namespace, services in service_dict.items():
         for service in services:
@@ -385,9 +394,16 @@ def get_app_service_info(cluster_url, cluster_token, app_name):
             )
             svc_dict[service] = svc
             if result_code != 1:
-                return -1, msg, {}, {}
-
-    return 1, "서비스 조회 성공", deploy_info_dict, svc_dict
+                return -1, msg, ""
+            print(svc_dict[service]["labels"])
+            match = True
+            for label in svc_dict[service]["labels"]:
+                if taget_labels[label] != svc_dict[service]["labels"][label]:
+                    match = False
+                    print("no")
+            if match == True:
+                return 1, "서비스 조회 성공", service, svc_dict[service]["labels"]["bluegreen"]
+    return -1, "서비스 조회 실패", "", ""
 
 
 def create_deployment_bluegreen(

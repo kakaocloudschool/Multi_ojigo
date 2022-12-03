@@ -11,6 +11,11 @@ from api_utils.argocd_apis import (
     del_argocd_app,
     get_app_deploy_and_service_info,
     post_rolling_update_sync,
+    get_kubernetes_deployment,
+    create_deployment_bluegreen,
+    get_app_deployment_service_info,
+    change_service_select_bg_label,
+    delete_deployment_bluegreen,
 )
 from api_utils.kubernetes_apis import parsing_kube_confing
 from .forms import ClusterForm, AppInfoForm, DeployForm, DeployMethodForm
@@ -162,17 +167,141 @@ def rollingupdate(request, pk):
 @login_required
 def bluegreen_detail(request, pk, app_name):
     appdeployrevision = get_object_or_404(AppDeployRevision, pk=pk, app_name=app_name)
+    if appdeployrevision.step in ("DONE", "ROLLBACK"):
+        return redirect("app_list")
     if request.method == "POST":
-        if "deploy" in request.POST:
+        print(appdeployrevision.step)
+        print(request.POST)
+        if "deploy" in request.POST and appdeployrevision.step in ("START"):
+            result_code, msg, deploy = get_kubernetes_deployment(
+                cluster_url=appdeployrevision.cluster_url,
+                cluster_token=appdeployrevision.cluster_token,
+                namespace=appdeployrevision.namespace,
+                deployment=appdeployrevision.deployment,
+            )
+            if result_code == -1:
+                messages.error(request, msg)
+                return render(
+                    request,
+                    "app/bluegreen_detail.html",
+                    {"appdeployrevision": appdeployrevision},
+                )
+            deploy_name = appdeployrevision.deployment
+            namespace = appdeployrevision.namespace
+            image = appdeployrevision.container + ":" + appdeployrevision.tag
+            replicas = deploy["replicas"]
+            labels = deploy["labels"]
+            if labels["bluegreen"] == "blue":
+                deploy_name = deploy_name[:-4] + "green"
+                labels["bluegreen"] = "green"
+                bef_label = "blue"
+                chg_label = "green"
 
-            appdeployrevision.step = "deploy"
-        elif "change" in request.POST:
-            print("신규 버전 전환")
-        elif "apply" in request.POST:
-            print("적용")
-        elif "rollback" in request.POST:
-            print("롤백")
+            elif labels["bluegreen"] == "green":
+                deploy_name = deploy_name[:-5] + "blue"
+                labels["bluegreen"] = "blue"
+                bef_label = "green"
+                chg_label = "blue"
 
+            result_code, msg = create_deployment_bluegreen(
+                cluster_url=appdeployrevision.cluster_url,
+                cluster_token=appdeployrevision.cluster_token,
+                deploy_name=deploy_name,
+                namespace=namespace,
+                image=image,
+                replicas=replicas,
+                labels=labels,
+            )
+            if result_code == 1:
+                messages.success(request, msg)
+                appdeployrevision.before_color = bef_label
+                appdeployrevision.change_color = chg_label
+                appdeployrevision.step = "DEPLOY"
+                appdeployrevision.save()
+            else:
+                messages.error(request, msg)
+        elif "change" in request.POST and appdeployrevision.step in ("DEPLOY"):
+            result_code, msg, service_name, label = get_app_deployment_service_info(
+                cluster_url=appdeployrevision.cluster_url,
+                cluster_token=appdeployrevision.cluster_token,
+                app_name=appdeployrevision.app_name,
+                namespace=appdeployrevision.namespace,
+                target_deployment=appdeployrevision.deployment,
+            )
+            if result_code == 1:
+                if label == "blue":
+                    label = "green"
+                else:
+                    label = "blue"
+                result_code, msg = change_service_select_bg_label(
+                    cluster_url=appdeployrevision.cluster_url,
+                    cluster_token=appdeployrevision.cluster_token,
+                    service_name=service_name,
+                    namespace=appdeployrevision.namespace,
+                    bg_label=label,
+                )
+                if result_code == 1:
+                    messages.success(request, msg)
+                    appdeployrevision.target_service = service_name
+                    appdeployrevision.step = "CHANGE"
+                    appdeployrevision.save()
+                else:
+                    messages.error(request, msg)
+            else:
+                messages.error(request, msg)
+        elif "rollback" in request.POST and appdeployrevision.step in (
+            "DEPLOY",
+            "CHANGE",
+        ):
+            if appdeployrevision.step == "CHANGE":
+                result_code, msg = change_service_select_bg_label(
+                    cluster_url=appdeployrevision.cluster_url,
+                    cluster_token=appdeployrevision.cluster_token,
+                    service_name=appdeployrevision.target_service,
+                    namespace=appdeployrevision.namespace,
+                    bg_label=appdeployrevision.before_color,
+                )
+                if result_code == 1:
+                    messages.success(request, msg)
+                    appdeployrevision.step = "DEPLOY"
+                    appdeployrevision.save()
+                else:
+                    messages.error(request, msg)
+            if appdeployrevision.step == "DEPLOY":
+                deploy_name = ""
+                if appdeployrevision.before_color == "blue":
+                    deploy_name = appdeployrevision.deployment[:-4] + "green"
+                elif appdeployrevision.before_color == "green":
+                    deploy_name = appdeployrevision.deployment[:-5] + "blue"
+
+                result_code, msg = delete_deployment_bluegreen(
+                    cluster_url=appdeployrevision.cluster_url,
+                    cluster_token=appdeployrevision.cluster_token,
+                    deploy_name=deploy_name,
+                    namespace=appdeployrevision.namespace,
+                )
+                if result_code == 1:
+                    messages.success(request, "롤백 성공")
+                    appdeployrevision.step = "ROLLBACK"
+                    appdeployrevision.save()
+                    return redirect("app_list")
+                else:
+                    messages.error(request, msg)
+        # Todo Kustomize 코드 변경 필요 (우선은 구현만 구현)
+        elif "apply" in request.POST and appdeployrevision.step in ("CHANGE"):
+            result_code, msg = delete_deployment_bluegreen(
+                cluster_url=appdeployrevision.cluster_url,
+                cluster_token=appdeployrevision.cluster_token,
+                deploy_name=appdeployrevision.deployment,
+                namespace=appdeployrevision.namespace,
+            )
+            if result_code == 1:
+                messages.success(request, "완전 적용 완료")
+                appdeployrevision.step = "DONE"
+                appdeployrevision.save()
+                return redirect("app_list")
+            else:
+                messages.error(request, msg)
     return render(
         request,
         "app/bluegreen_detail.html",
@@ -195,7 +324,7 @@ def bluegreen(request, pk):
         app_revision.deployment = request.POST["deployment"]
         app_revision.container = request.POST["container"]
         app_revision.tag = request.POST["version"]
-        app_revision.step = "SELECT"
+        app_revision.step = "START"
         if app_revision.tag is None or len(app_revision.tag.strip()) == 0:
             print("isnone")
         else:
