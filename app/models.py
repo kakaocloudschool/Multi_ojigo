@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class Cluster(models.Model):
     cluster_name = models.CharField(
         max_length=100, primary_key=True, verbose_name="클러스터 이름"
@@ -51,7 +52,7 @@ class Schedule(models.Model):
     insert_at = models.DateTimeField(auto_now_add=True)
     update_user = models.CharField(max_length=100)
     update_at = models.DateTimeField(auto_now=True)
-    #schedule_dt = models.
+    # schedule_dt = models.
 
     def __str__(self):
         return self.app_name
@@ -65,11 +66,13 @@ class AppDeployRevision(models.Model):
     cluster_token = models.TextField()
     namespace = models.CharField(max_length=100)
     deployment = models.CharField(max_length=100)
+    new_deployment = models.CharField(max_length=100, null=True)
     container = models.CharField(max_length=100)
     tag = models.CharField(max_length=100)
     before_color = models.CharField(max_length=10, null=True)
     change_color = models.CharField(max_length=10, null=True)
     target_service = models.CharField(max_length=100, null=True)
+    before_replicas = models.CharField(max_length=10, null=True)
     step = models.CharField(max_length=30)
     insert_user = models.CharField(max_length=100)
     insert_at = models.DateTimeField(auto_now_add=True)

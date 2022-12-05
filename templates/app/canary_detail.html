@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% load django_bootstrap5 %}
-
+{% block head %}
+    <meta http-equiv="refresh" content="10">
+{% endblock head %}
 {% block content %}
 
     <!-- Page Wrapper -->
@@ -70,22 +72,25 @@
                                 <hr/>
                                 </div>
 
-
-                                <a href="#" class="btn btn-primary" style="float:left; margin-right:15px;" type="reset" onclick='openCloseToc();'>
-                                    <span class="icon text-white-50">
-                                    </span>
-                                    <span class="text">1% 배포</span>
-                                </a>
-                                <a href="#" class="btn btn-primary" style="float:left; margin-right:15px;" type="reset" onclick='openCloseToc1();'>
-                                    <span class="icon text-white-50">
-                                    </span>
-                                    <span class="text">10% 배포</span>
-                                </a>
-                                <a href="#" class="btn btn-primary" style="float:left; margin-right:15px;" type="reset" onclick='openCloseToc2();'>
-                                    <span class="icon text-white-50">
-                                    </span>
-                                    <span class="text">롤백</span>
-                                </a>
+                                <button class="btn btn-primary" name="deploy">Canary 배포(Promote)</button>
+                                <button class="btn btn-primary" name="change">롤백</button>
+                                <button class="btn btn-primary" name="deploy">버전 확정</button>
+{#                                <a href="#" class="btn btn-primary" style="float:left; margin-right:15px;" type="reset" onclick='openCloseToc();'>#}
+{#                                    <button class="btn btn-primary" name="deploy">신규 버전 배포</button>#}
+{#                                    <span class="icon text-white-50">#}
+{#                                    </span>#}
+{#                                    <span class="text">배포</span>#}
+{#                                </a>#}
+{#                                <a href="#" class="btn btn-primary" style="float:left; margin-right:15px;" type="reset" onclick='openCloseToc1();'>#}
+{#                                    <span class="icon text-white-50">#}
+{#                                    </span>#}
+{#                                    <span class="text">롤백</span>#}
+{#                                </a>#}
+{#                                <a href="#" class="btn btn-primary" style="float:left; margin-right:15px;" type="reset" onclick='openCloseToc2();'>#}
+{#                                    <span class="icon text-white-50">#}
+{#                                    </span>#}
+{#                                    <span class="text">확정</span>#}
+{#                                </a>#}
                                 <a href="{% url 'app_list' %}" class="btn btn-danger" style="float:right;">
                                     <span class="icon text-white-50">
                                     </span>
