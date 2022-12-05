@@ -113,8 +113,6 @@ def del_cluster(request, slug):
 
 
 # push
-
-
 @login_required
 def delete_app(request, pk):
     appinfo = get_object_or_404(AppInfo, pk=pk)
@@ -157,8 +155,7 @@ def deploy_app(request, pk):
         elif form.cleaned_data["deploy_type"] == "BlueGreen":
             return redirect("bluegreen", pk=appinfo.app_name)
         elif form.cleaned_data["deploy_type"] == "Canary":
-            return render(request, "app/canary.html", {"appinfo": appinfo})
-
+            return redirect("canary", pk=appinfo.app_name)
     return render(request, "app/app_deploy.html", {"form": form})
 
 
@@ -256,6 +253,7 @@ def bluegreen_detail(request, pk, app_name):
                 appdeployrevision.before_color = bef_label
                 appdeployrevision.change_color = chg_label
                 appdeployrevision.step = "DEPLOY"
+                appdeployrevision.update_user = request.user.id
                 appdeployrevision.save()
             else:
                 messages.error(request, msg)
@@ -282,6 +280,7 @@ def bluegreen_detail(request, pk, app_name):
                 if result_code == 1:
                     messages.success(request, msg)
                     appdeployrevision.target_service = service_name
+                    appdeployrevision.update_user = request.user.id
                     appdeployrevision.step = "CHANGE"
                     appdeployrevision.save()
                 else:
@@ -304,6 +303,7 @@ def bluegreen_detail(request, pk, app_name):
                 if result_code == 1:
                     messages.success(request, msg)
                     appdeployrevision.step = "DEPLOY"
+                    appdeployrevision.update_user = request.user.id
                     appdeployrevision.save()
                 else:
                     messages.error(request, msg)
@@ -322,11 +322,13 @@ def bluegreen_detail(request, pk, app_name):
                 )
                 if result_code == 1:
                     appdeployrevision.step = "START"
+                    appdeployrevision.update_user = request.user.id
                     appdeployrevision.save()
                 else:
                     messages.error(request, msg)
             if appdeployrevision.step == "START":
                 appdeployrevision.step = "ROLLBACK"
+                appdeployrevision.update_user = request.user.id
                 appdeployrevision.save()
                 messages.success(request, "롤백 / 선택 취소 성공")
                 return redirect("app_list")
@@ -362,7 +364,7 @@ def bluegreen(request, pk):
     if len(revision) > 0:
         revision_pk = revision.aggregate(Max("pk"))["pk__max"]
         last_revision = AppDeployRevision.objects.get(pk=revision_pk)
-        if last_revision.step not in ("START", "DONE", "ROLLBACK"):
+        if last_revision.step not in ("DONE", "ROLLBACK"):
             if last_revision.deploy_type == "BLUEGREEN":
                 messages.info(request, "진행 중인 배포 작업이 있습니다.")
                 return redirect(
@@ -389,6 +391,8 @@ def bluegreen(request, pk):
         app_revision.container = request.POST["container"]
         app_revision.tag = request.POST["version"]
         app_revision.step = "START"
+        app_revision.insert_user = request.user.id
+        app_revision.update_user = request.user.id
         if app_revision.tag is None or len(app_revision.tag.strip()) == 0:
             print("isnone")
         else:
@@ -406,7 +410,7 @@ def bluegreen(request, pk):
     form.cluster_token = cluster.bearer_token
     form.app_name = appinfo.app_name
     form.namespace = appinfo.namespace
-    form.type = "bluegreen"
+    form.type = "BLUEGREEN"
     deploy_list = []
     container_list = []
     result_code, msg, deploy_info_dict, svc_dict = get_app_deploy_and_service_info(
@@ -435,6 +439,106 @@ def bluegreen(request, pk):
             "container_info": container_list,
             "svc_dict": svc_dict,
         },
+    )
+
+
+@login_required
+def canary(request, pk):
+    appinfo = get_object_or_404(AppInfo, pk=pk)
+    cluster = Cluster.objects.get(cluster_name=appinfo.cluster_name)
+    # Last revision check
+    revision = AppDeployRevision.objects.filter(app_name=str(appinfo.app_name))
+    if len(revision) > 0:
+        revision_pk = revision.aggregate(Max("pk"))["pk__max"]
+        last_revision = AppDeployRevision.objects.get(pk=revision_pk)
+        if last_revision.step not in ("DONE", "ROLLBACK"):
+            if last_revision.deploy_type == "BLUEGREEN":
+                messages.info(request, "진행 중인 배포 작업이 있습니다.")
+                return redirect(
+                    "bluegreen_detail",
+                    pk=last_revision.pk,
+                    app_name=str(appinfo.app_name),
+                )
+            elif last_revision.deploy_type == "CANARY":
+                messages.info(request, "진행 중인 배포 작업이 있습니다.")
+                return redirect(
+                    "canary_detail",
+                    pk=last_revision.pk,
+                    app_name=str(appinfo.app_name),
+                )
+    if request.method == "POST":
+        app_revision = AppDeployRevision()
+        app_revision.app_name = appinfo.app_name
+        app_revision.deploy_type = "CANARY"
+        app_revision.cluster_name = cluster.cluster_name
+        app_revision.cluster_url = cluster.cluster_url
+        app_revision.cluster_token = cluster.bearer_token
+        app_revision.namespace = appinfo.namespace
+        app_revision.deployment = request.POST["deployment"]
+        app_revision.container = request.POST["container"]
+        app_revision.tag = request.POST["version"]
+        app_revision.step = "START"
+        app_revision.insert_user = request.user.id
+        app_revision.update_user = request.user.id
+        if app_revision.tag is None or len(app_revision.tag.strip()) == 0:
+            print("isnone")
+        else:
+            app_revision.save()
+            revision = AppDeployRevision.objects.filter(
+                app_name=str(app_revision.app_name)
+            )
+            revision_pk = revision.aggregate(Max("pk"))["pk__max"]
+            return redirect("canary_detail", pk=revision_pk, app_name=appinfo.app_name)
+
+    form = DeployMethodForm()
+    form.cluster_url = cluster.cluster_url
+    form.cluster_token = cluster.bearer_token
+    form.app_name = appinfo.app_name
+    form.namespace = appinfo.namespace
+    form.type = "CANARY"
+    deploy_list = []
+    container_list = []
+    result_code, msg, deploy_info_dict, svc_dict = get_app_deploy_and_service_info(
+        cluster_url=form.cluster_url,
+        cluster_token=form.cluster_token,
+        app_name=appinfo.app_name,
+    )
+    if result_code == -1:
+        messages.error(request, msg)
+        redirect("/")
+    else:
+        for deploy in deploy_info_dict:
+            deploy_list.append(deploy)
+            for container in deploy_info_dict[deploy]["image"]:
+                container_list.append(
+                    {"deploy": deploy, "image": container.split(":")[0]}
+                )
+    return render(
+        request,
+        "app/canary.html",
+        {
+            "form": form,
+            "app_name": appinfo.app_name,
+            "namespace": appinfo.namespace,
+            "deploy_info": deploy_list,
+            "container_info": container_list,
+            "svc_dict": svc_dict,
+        },
+    )
+
+
+@login_required
+def canary_detail(request, pk, app_name):
+    appdeployrevision = get_object_or_404(AppDeployRevision, pk=pk, app_name=app_name)
+    if appdeployrevision.step in ("DONE", "ROLLBACK"):
+        return redirect("app_list")
+    if request.method == "POST":
+        print(appdeployrevision.step)
+        print(request.POST)
+    return render(
+        request,
+        "app/canary_detail.html",
+        {"appdeployrevision": appdeployrevision},
     )
 
 
