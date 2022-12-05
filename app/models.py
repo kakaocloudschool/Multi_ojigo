@@ -36,27 +36,55 @@ class AppInfo(models.Model):
         return self.app_name
 
 
-class Schedule(models.Model):
-    app_name = models.ForeignKey(
-        AppInfo, on_delete=models.CASCADE, verbose_name="APP 이름"
-    )
-    cluster_name = models.ForeignKey(
-        Cluster, on_delete=models.CASCADE, verbose_name="클러스터 이름"
-    )
-    auto_create_ns = models.BooleanField(default=False, verbose_name="네임스페이스 생성")
-    namespace = models.CharField(max_length=100, verbose_name="네임스페이스")
-    repo_url = models.CharField(max_length=200, verbose_name="레파지토리 주소")
-    target_revision = models.CharField(max_length=100, verbose_name="타겟 브랜치")
-    target_path = models.CharField(max_length=100, verbose_name="레파지토리 경로")
+
+
+class AppDeployRevision(models.Model):
+    app_name = models.CharField(max_length=100)
+    deploy_type = models.CharField(max_length=20)
+    cluster_name = models.CharField(max_length=100)
+    cluster_url = models.TextField()
+    cluster_token = models.TextField()
+    namespace = models.CharField(max_length=100)
+    deployment = models.CharField(max_length=100)
+    container = models.CharField(max_length=100)
+    tag = models.CharField(max_length=100)
+    before_color = models.CharField(max_length=10, null=True)
+    change_color = models.CharField(max_length=10, null=True)
+    target_service = models.CharField(max_length=100, null=True)
+    step = models.CharField(max_length=30)
     insert_user = models.CharField(max_length=100)
     insert_at = models.DateTimeField(auto_now_add=True)
     update_user = models.CharField(max_length=100)
     update_at = models.DateTimeField(auto_now=True)
-    # schedule_dt = models.
 
     def __str__(self):
         return self.app_name
 
+class Scheduler(models.Model):
+    MY_CHOICES = (  # 각 튜플의 첫 번째 요소는 DB에 저장할 실제 값이고, 두 번째 요소는 display 용 이름이다.
+        ("RollingUpdate", "롤링 업데이트 배포"),
+        ("BlueGreen", "블루그린 배포"),
+        ("Canary", "카나리 배포"),
+    )
+    app_name = models.ForeignKey(AppInfo, on_delete=models.RESTRICT)
+    deploy_type = models.CharField(max_length=20, choices=MY_CHOICES, default="RollingUpdate")
+    cluster_name = models.CharField(max_length=100)
+    cluster_url = models.TextField()
+    cluster_token = models.TextField()
+    namespace = models.CharField(max_length=100)
+    deployment = models.CharField(max_length=100)
+    container = models.CharField(max_length=100)
+    tag = models.CharField(max_length=100)
+    before_color = models.CharField(max_length=10, null=True)
+    change_color = models.CharField(max_length=10, null=True)
+    target_service = models.CharField(max_length=100, null=True)
+    step = models.CharField(max_length=30)
+    insert_user = models.CharField(max_length=100)
+    insert_at = models.DateTimeField(auto_now_add=True)
+    update_user = models.CharField(max_length=100)
+    update_at = models.DateTimeField(auto_now=True)
+    schedule_dt = models.DateField(auto_now=False)
+    manager_user = models.CharField(max_length=100)
 
 class CanaryStategyMaster(models.Model):
     sterategy = models.CharField(max_length=100)

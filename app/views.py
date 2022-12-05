@@ -15,10 +15,10 @@ from api_utils.argocd_apis import (
     get_app_deploy_and_service_info,
     post_rolling_update_sync,
     get_kubernetes_deployment,
+    create_deployment,
     get_app_deployment_service_info,
     change_service_select_bg_label,
     delete_deployment,
-    create_deployment,
     update_deployment_scale,
 )
 from .forms import ClusterForm, AppInfoForm, DeployForm, DeployMethodForm
@@ -30,6 +30,9 @@ from .models import (
     CanaryStategyMaster,
     CananryDeployHistory,
 )
+from api_utils.kubernetes_apis import parsing_kube_confing
+from .forms import ClusterForm, AppInfoForm, DeployForm, DeployMethodForm, SchedulerForm
+from .models import AppInfo, Cluster, AppDeployHistory, AppDeployRevision, Scheduler
 
 ARGOCD_URL = getattr(settings, "ARGOCD_URL", None)
 ARGOCD_USERNAME = getattr(settings, "ARGOCD_USERNAME", None)
@@ -47,6 +50,11 @@ def app_list(request):
     qs = AppInfo.objects.all()
     return render(request, "index.html", {"appinfo_list": qs})
 
+def scheduler(request, pk):
+    qs = Scheduler.objects.all()
+    if qs:
+        qs = qs.filter(app_name__app_name__exact=pk)
+    return render(request, "app/scheduler.html", {"scheduler": qs})
 
 @login_required
 def schedule_list(request):
@@ -56,25 +64,24 @@ def schedule_list(request):
 
 @login_required
 def new_schedule(request):
-    #     if request.method == "POST":
-    #         form = ClusterForm(request.POST, request.FILES)
-    #         if form.is_valid():
-    #             cluster = Cluster()
-    #             cluster.cluster_name = form.cleaned_data["cluster_name"]
-    #             cluster.kubeconfig = form.cleaned_data["kubeconfig"]
-    #             cluster.bearer_token = form.cleaned_data["bearer_token"]
-    #             cluster.user_id = request.user.id
-    #             cluster, result_code, msg = chk_and_register_cluster(cluster)
-    #             if result_code == -1:
-    #                 messages.error(request, msg)
-    #             else:
-    #                 messages.success(request, "클러스터 생성 성공.")
-    #                 cluster.save()
-    #                 return redirect("cluster_list")
-    #     else:
-    #         form = ClusterForm()
-    #
-    return render(request, "app/write_form.html", {"form": form})
+    if request.method == "POST":
+        form = SchedulerForm(request.POST, request.FILES)
+        if form.is_valid():
+            scheduler = Scheduler()
+            scheduler.cluster_name = form.cleaned_data["cluster_name"]
+            scheduler.kubeconfig = form.cleaned_data["kubeconfig"]
+            scheduler.bearer_token = form.cleaned_data["bearer_token"]
+            scheduler.user_id = request.user.id
+            # scheduler, result_code, msg = chk_and_register_cluster(scheduler)
+            if result_code == -1:
+                messages.error(request, msg)
+            else:
+                messages.success(request, "클러스터 생성 성공.")
+                cluster.save()
+                return redirect("scheduler")
+    else:
+        form = SchedulerForm()
+    return render(request, "app/new_schedule.html", {"form": form})
 
 
 # Todo - 임시 중첩 if 문 작성 -> 에러 메세지 처리 나온 이후에는, 변환할 것.
@@ -925,3 +932,7 @@ def history_app(request, q):
 
 def test_web(request):
     return render(request, "test.html")
+
+
+
+

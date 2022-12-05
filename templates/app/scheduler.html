@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <!-- DataTales Example -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Scheduler</h6>
+        </div>
+        <div class="card-body">
+
+                <a href="{% url 'new_schedule' %}" class="btn btn-primary" style="float:right; margin-right:15px;">
+                    <span class="icon text-white-50">
+                    </span>
+                    <span class="text">스케줄 등록</span>
+                </a>
+            <br/>
+            <br/>
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Namespace</th>
+                            <th style="width: 130px;">Deploy</th>
+                            <th style="width: 130px;">Container</th>
+                            <th>Tag</th>
+                            <th>배포 타입</th>
+                            <th>배포 일정</th>
+                            <th>등록 유저</th>
+                            <th>승인 매니저</th>
+<!--                            <th>수정</th><th>삭제</th>-->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for schedule in scheduler %}
+                        <tr>
+                            <td >{{ schedule.namespace }}</td>
+                            <td >{{ schedule.deployment }}</td>
+                            <td >{{ schedule.container }}</td>
+                            <td >{{ schedule.tag }}</td>
+                            <td >{{ schedule.deploy_type }}</td>
+                            <td >{{ schedule.schedule_dt }}</td>
+                            <td >{{ schedule.update_user }}</td>
+                            <td >{{ schedule.manager_user }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /.container-fluid -->
+{% endblock %}

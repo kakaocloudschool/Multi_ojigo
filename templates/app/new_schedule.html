@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+
+{% block content %}
+
+    <!-- Page Wrapper -->
+    <div id="wrapper">
+
+        <!-- hello -->
+
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column">
+
+            <!-- Main Content -->
+            <div id="content">
+
+                <!-- Begin Page Content -->
+                <div class="container-fluid"><br/>
+
+                    <!-- Page Heading -->
+                    <h1 class="h3 mb-2 text-gray-800">Schedule job</h1>
+
+
+                    <!-- DataTales Example -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary" style="float:left; margin-right: 10px;">APP : {{ app_name }}</h6>
+                            <label style="height: 10px; float:right; margin-right: 10px;">NameSpace [ {{ namespace }} ]</label>
+                        </div>
+                        <div class="card-body">
+
+                            <form method="POST" id='form'>
+                                {% csrf_token %}
+                                <h5 class="m-2 font-weight-bold text-primary" style="float:left;">날짜/시간 선택 : </h5>
+                                <div class='input-group' id='datetimepicker1' data-td-target-input='nearest' data-td-target-toggle='nearest' style="width:300px;">
+                                   <input id='datetimepicker1Input' type='text' class='form-control' data-td-target='#datetimepicker1' />
+                                   <span class='input-group-text' data-td-target='#datetimepicker1' data-td-toggle='datetimepicker'>
+                                     <span class='fa-solid fa-calendar'></span>
+                                   </span>
+                                </div>
+                                <hr style="position: relative; top: 5px;"/>
+<!--                                <h5 class="m-2 font-weight-bold text-primary">배포방식 선택 : </h5>-->
+<!--                                <div style="margin-left:10px; position: relative; top: 7px;">{{ form.deploy_type }}</div>-->
+                                <h5 class="m-2 font-weight-bold text-primary" style="float:left; ">배포방식 선택 : </h5>
+                                <div style="margin-left:160px; position: relative; top: 7px;">{{ form.deploy_type }}</div>
+
+
+                                <hr />
+
+                                <a href="{% url 'app_list' %}" class="btn btn-danger" style="float:right;" >
+                                    <span class="icon text-white-50">
+                                    </span>
+                                    <span class="text">나가기</span>
+                                </a>
+                                <a href="#" class="btn btn-primary" style="float:right; margin-right: 15px;" >
+                                    <span class="icon text-white-50">
+                                    </span>
+                                    <span class="text">저장</span>
+                                </a>
+
+                            </form>
+
+                        </div>
+                    </div>
+
+                </div>
+                <!-- /.container-fluid -->
+
+            </div>
+            <!-- End of Main Content -->
+
+        </div>
+        <!-- End of Content Wrapper -->
+
+    </div>
+    <!-- End of Page Wrapper -->
+
+<script>
+new tempusDominus.TempusDominus(document.getElementById('datetimepicker1'), {
+    display: {
+        components: {
+            seconds: false,
+            useTwentyfourHour: false,
+        },
+        icons: {
+            type: 'icons',
+            time: 'fa fa-solid fa-clock',
+            date: 'fa fa-solid fa-calendar',
+            up: 'fa fa-solid fa-arrow-up',
+            down: 'fa fa-solid fa-arrow-down',
+            previous: 'fa fa-solid fa-chevron-left',
+            next: 'fa fa-solid fa-chevron-right',
+            today: 'fa fa-solid fa-calendar-check',
+            clear: 'fa fa-solid fa-trash',
+            close: 'fas fa-solid fa-xmark'
+        },
+    },
+});
+</script>
+
+{% endblock %}
