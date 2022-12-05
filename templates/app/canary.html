@@ -24,16 +24,14 @@
                     <!-- DataTales Example -->
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary" style="float:left; margin-right: 10px;">{{appinfo.app_name}}</h6>
-                            <label style="height: 10px; float:right; margin-right: 10px;">
-                                NAMESPACE : {{appinfo.namespace}}</label>
+                            <h6 class="m-0 font-weight-bold text-primary" style="float:left; margin-right: 10px;">APP : {{ app_name }}</h6>
+                            <label style="height: 10px; float:right; margin-right: 10px;">NameSpace [ {{ namespace }} ]</label>
                         </div>
                         <div class="card-body">
 
-
-                            <form action="#" method="POST" id='form'>
+                            <form method="POST" id='form'>
                                 {% csrf_token %}
-                                <div class="mb-4 " style="float:left; margin-right:25px;" >
+                                <div class="mb-4 w-25" style="float:left; margin-right:25px;" >
                                     <select id="deployment" name="deployment" class="form-control">
                                         <option hidden selected value="" id="nulldeployment">Deployment</option>
                                         {% for deployment in deploy_info %}
@@ -41,27 +39,25 @@
                                         {% endfor %}
                                     </select>
                                 </div>
-                                <div class="mb-4 " style="float:left; margin-right:25px;" >
+                                <div class="mb-4 w-50" style="float:left; margin-right:25px;" >
                                     <select id="container" name="container" class="form-control">
                                         <option hidden selected value="" id="nullcontainer">Container</option>
-                                        <option value="1" parent="A">1</option>
-                                        <option value="2" parent="A">2</option>
-                                        <option value="3" parent="B">3</option>
-                                        <option value="4" parent="B">4</option>
-                                        <option value="5" parent="C">5</option>
-                                        <option value="6" parent="C">6</option>
+                                        {% for container in container_info %}
+                                            <option value="{{ container.image }}" parent="{{ container.deploy }}">{{ container.image }}</option>
+                                        {% endfor %}
                                     </select>
                                 </div>
                                 <div class="mb-4 " >
-                                    <input type="text" class="form-control form-control-user" style="float:left; margin-right:5px; width:150px; text-align:center;" id="appname"
-                                        placeholder="Version 입력" name="appname" value="">
-                                    <a href="#" class="btn btn-primary" type="reset" onclick='return chk_form(); self.close();'>
+                                    <input type="text" class="form-control form-control-user" style="float:left; margin-right:5px; width:150px; text-align:right;" id="version"
+                                        placeholder="Version 입력" name="version" value="">
+                                    <a class="btn btn-primary" type="target" >
                                         <span class="icon text-white-50">
                                         </span>
-                                        <span class="text">적용</span>
+                                        <button class="btn btn-primary" name="target">저장</button>
                                     </a>
                                 </div>
                                 <hr/>
+                                <a href="{% url 'app_list' %}" class="btn btn-danger" style="float:right;" >
 
                                 <!-- 게이지 차는 뷰-->
                                 <div id="toc-content" >
@@ -88,26 +84,13 @@
                                 <a href="#" class="btn btn-primary" style="float:left; margin-right:15px;" type="reset" onclick='openCloseToc();'>
                                     <span class="icon text-white-50">
                                     </span>
-                                    <span class="text">1% 배포</span>
-                                </a>
-                                <a href="#" class="btn btn-primary" style="float:left; margin-right:15px;" type="reset" onclick='openCloseToc1();'>
-                                    <span class="icon text-white-50">
-                                    </span>
-                                    <span class="text">10% 배포</span>
-                                </a>
-                                <a href="#" class="btn btn-primary" style="float:left; margin-right:15px;" type="reset" onclick='openCloseToc2();'>
-                                    <span class="icon text-white-50">
-                                    </span>
-                                    <span class="text">롤백</span>
-                                </a>
-                                <a href="{% url 'app_list' %}" class="btn btn-danger" style="float:right;">
-                                    <span class="icon text-white-50">
-                                    </span>
                                     <span class="text">나가기</span>
                                 </a>
-
-
-
+                                <a href="#" class="btn btn-primary" style="float:right; margin-right:15px;" onclick="history.go(-1)">
+                                    <span class="icon text-white-50">
+                                    </span>
+                                    <span class="text">돌아가기</span>
+                                </a>
                             </form>
 
                         </div>
@@ -124,28 +107,30 @@
 
     </div>
     <!-- End of Page Wrapper -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
 
-    <script>
-        function openCloseToc() {
-            document.getElementById('toc-content').style.display = 'block';
-        }
-        function openCloseToc1() {
-            document.getElementById('toc-content1').style.display = 'block';
-        }
-        function openCloseToc2() {
-            document.getElementById('toc-content2').style.display = 'block';
-        }
+    function openCloseToc() {
+        document.getElementById('toc-content').style.display = 'block';
+    }
+    function openCloseToc1() {
+        document.getElementById('toc-content1').style.display = 'block';
+    }
+    function openCloseToc2() {
+        document.getElementById('toc-content2').style.display = 'block';
+    }
 
-        var document = window.document;
-        $(document).ready(function(){
-            var $deploymentvar=$("#deployment");
-            var $containervar=$("#container");
-            var $containeroptions=$containervar.find('option');
-            $containervar.html($containeroptions.filter('[value=""]'));
-            $deploymentvar.on('change',function(){
-                $containervar.html($containeroptions.filter('[parent="'+this.value+'"],[value=""]'));
-                $('#container option[value=""]').prop('selected', true);
-            });
+    var document = window.document;
+    $(document).ready(function(){
+        var $deploymentvar=$("#deployment");
+        var $containervar=$("#container");
+        var $containeroptions=$containervar.find('option');
+        $containervar.html($containeroptions.filter('[value=""]'));
+        $deploymentvar.on('change',function(){
+            $containervar.html($containeroptions.filter('[parent="'+this.value+'"],[value=""]'));
+            $('#container option[value=""]').prop('selected', true);
         });
-    </script>
+    });
+</script>
+
 {% endblock %}

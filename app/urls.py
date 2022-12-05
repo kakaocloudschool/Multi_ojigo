@@ -11,6 +11,8 @@ from .views import (
     bluegreen,
     rollingupdate,
     bluegreen_detail,
+    canary,
+    canary_detail,
     schedule_list,
     new_schedule,
 )
@@ -27,6 +29,12 @@ urlpatterns = [
         "appinfo_deploy/<str:app_name>/bluegreen/<int:pk>",
         bluegreen_detail,
         name="bluegreen_detail",
+    ),
+    path("appinfo_deploy/<str:pk>/canary", canary, name="canary"),
+    path(
+        "appinfo_deploy/<str:app_name>/canary/<int:pk>",
+        canary_detail,
+        name="canary_detail",
     ),
     path("appinfo_deploy/<str:pk>/rollingupdate", rollingupdate, name="rollingupdate"),
     path("appinfo_history/<str:q>", history_app, name="appinfo_history"),

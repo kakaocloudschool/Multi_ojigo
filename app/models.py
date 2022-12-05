@@ -71,6 +71,10 @@ class AppDeployRevision(models.Model):
     change_color = models.CharField(max_length=10, null=True)
     target_service = models.CharField(max_length=100, null=True)
     step = models.CharField(max_length=30)
+    insert_user = models.CharField(max_length=100)
+    insert_at = models.DateTimeField(auto_now_add=True)
+    update_user = models.CharField(max_length=100)
+    update_at = models.DateTimeField(auto_now=True)
 
 
 class AppDeployHistory(models.Model):
