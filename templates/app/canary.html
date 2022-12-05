@@ -81,7 +81,7 @@
                                     <label>RollBack 중</label>
                                     <meter value="0.5" optimum="0.8"></meter>
                                     <!-- 전체 1 중에서 현재 0.5를 차지하고 있으며 적정도를 0.8로 설정했습니다. -->
-<hr/>
+                                <hr/>
                                 </div>
 
 
@@ -125,58 +125,6 @@
     </div>
     <!-- End of Page Wrapper -->
 
-
-
-    <script>
-        function chk_form() {
-        if(document.getElementById("appname").value==''){
-            alert("Version 정보를 입력해주십시오.");
-            return false;
-        }
-
-        if(document.getElementById("namespace").value==''){
-            alert("Namespace를 입력해주십시오.");
-            return false;
-        }
-        if (document.getElementById("repourl").value=='') {
-            alert('GitHub Repository를 입력해주십시오.');
-            return false;
-        }
-        if (document.getElementById("targetrevision").value=='') {
-            alert('GitHub Branch를 입력해주십시오.');
-            return false;
-        }
-        if (document.getElementById("targetpath").value=='') {
-            alert('GitHub Manifest를 입력해주십시오.');
-            return false;
-        }
-        document.getElementById('form').submit();
-        }
-    </script>
-    <script>
-        function changeBtnAWS() {
-            const btnElement = document.getElementById('dropdownMenuDeploy');
-            const clustername = document.getElementById('aws').getAttribute('data-value');
-            btnElement.innerText = clustername;
-        }
-        function changeBtnGCP() {
-            const btnElement = document.getElementById('dropdownMenuDeploy');
-            const clustername = document.getElementById('gcp').getAttribute('data-value');
-            btnElement.innerText = clustername;
-        }
-        function changeBtnHAHA() {
-            const btnElement = document.getElementById('dropdownMenuButton1');
-            const clustername = document.getElementById('haha').getAttribute('data-value');
-            btnElement.innerText = clustername;
-        }
-        function changeBtnHA() {
-            const btnElement = document.getElementById('dropdownMenuButton1');
-            const clustername = document.getElementById('ha').getAttribute('data-value');
-            btnElement.innerText = clustername;
-        }
-    </script>
-
-
     <script>
         function openCloseToc() {
             document.getElementById('toc-content').style.display = 'block';
@@ -187,9 +135,7 @@
         function openCloseToc2() {
             document.getElementById('toc-content2').style.display = 'block';
         }
-    </script>
 
-    <script>
         var document = window.document;
         $(document).ready(function(){
             var $deploymentvar=$("#deployment");

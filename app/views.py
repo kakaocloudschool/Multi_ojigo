@@ -37,6 +37,34 @@ def app_list(request):
     qs = AppInfo.objects.all()
     return render(request, "index.html", {"appinfo_list": qs})
 
+@login_required
+def schedule_list(request):
+    qs = Cluster.objects.all()
+    return render(request, "app/schedule_list.html", {"schedule_list": qs})
+
+
+@login_required
+def new_schedule(request):
+#     if request.method == "POST":
+#         form = ClusterForm(request.POST, request.FILES)
+#         if form.is_valid():
+#             cluster = Cluster()
+#             cluster.cluster_name = form.cleaned_data["cluster_name"]
+#             cluster.kubeconfig = form.cleaned_data["kubeconfig"]
+#             cluster.bearer_token = form.cleaned_data["bearer_token"]
+#             cluster.user_id = request.user.id
+#             cluster, result_code, msg = chk_and_register_cluster(cluster)
+#             if result_code == -1:
+#                 messages.error(request, msg)
+#             else:
+#                 messages.success(request, "클러스터 생성 성공.")
+#                 cluster.save()
+#                 return redirect("cluster_list")
+#     else:
+#         form = ClusterForm()
+#
+     return render(request, "app/write_form.html", {"form": form})
+
 
 # Todo - 임시 중첩 if 문 작성 -> 에러 메세지 처리 나온 이후에는, 변환할 것.
 @login_required
@@ -450,3 +478,7 @@ def history_app(request, q):
 
 def test_web(request):
     return render(request, "test.html")
+
+
+
+

@@ -40,9 +40,11 @@ DEBUG = True
 ALLOWED_HOSTS = [
     "127.0.0.1",
     "localhost",
-    "0.0.0.0" "",
+    "192.168.0.0",
 ]
 
+# APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
+# APSCHEDULER_RUN_NOW_TIMEOUT = 25
 
 # Application definition
 
@@ -59,6 +61,7 @@ INSTALLED_APPS = [
     # local apps
     "accounts",
     "app",
+    "django_apscheduler",
 ]
 
 MIDDLEWARE = [
@@ -96,13 +99,13 @@ WSGI_APPLICATION = "Multi_ojigo.wsgi.application"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 if DEBUG:
-    # DATABASES = {
-    #     "default": {
-    #         "ENGINE": "django.db.backends.sqlite3",
-    #         "NAME": BASE_DIR / "db.sqlite3",
-    #     }
-    # }
-    # else:
+#     DATABASES = {
+#         "default": {
+#             "ENGINE": "django.db.backends.sqlite3",
+#             "NAME": BASE_DIR / "db.sqlite3",
+#         }
+#     }
+# else:
     pymysql.install_as_MySQLdb()
     DATABASES = {
         "default": {

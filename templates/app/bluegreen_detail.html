@@ -47,22 +47,51 @@
                                     <br>
                                 </div>
                                 <hr/>
+
+                                <!-- 게이지 차는 뷰-->
+                                <div id="toc-content" >
+
+                                    <label>1% 배포 진행률</label>
+                                    <meter min="0" value="50" max="100"></meter>
+                                    <!-- 전체 크기 1을 기준으로 0.8만큼 차지합니다. -->
+                                <hr/>
+                                </div>
+                                <div id="toc-content1" >
+                                    <label>10% 배포 진행률</label>
+                                    <meter min="1024" max="10240" low="2048" high="8192" value="9216"></meter>
+                                    <!-- 전체크기는 1024~10240인데 높다고 설정한 8192보다 현재 값 9216이 더 큽니다. -->
+                                <hr/>
+                                </div>
+                                <div id="toc-content2" >
+                                    <label>RollBack 중</label>
+                                    <meter value="0.5" optimum="0.8"></meter>
+                                    <!-- 전체 1 중에서 현재 0.5를 차지하고 있으며 적정도를 0.8로 설정했습니다. -->
+                                <hr/>
+                                </div>
+                                <div id="toc-content3" >
+                                    <label>RollBack 중</label>
+                                    <meter value="0.5" optimum="0.8"></meter>
+                                    <!-- 전체 1 중에서 현재 0.5를 차지하고 있으며 적정도를 0.8로 설정했습니다. -->
+                                <hr/>
+                                </div>
+
+
                                 {% if appdeployrevision.step == "START"%}
-                                    <button class="btn btn-primary" name="deploy">신규 버전 배포</button>
+                                    <button class="btn btn-primary" name="deploy" onclick='openCloseToc();'>신규 버전 배포</button>
                                 {% else %}
                                     <button class="btn btn-primary" name="deploy" disabled>신규 버전 배포</button>
                                 {% endif %}
                                 {% if appdeployrevision.step == "DEPLOY"%}
-                                    <button class="btn btn-primary" name="change">신규 버전 전환</button>
+                                    <button class="btn btn-primary" name="change" onclick='openCloseToc1();'>신규 버전 전환</button>
                                 {% else %}
                                     <button class="btn btn-primary" name="change" disabled>신규 버전 전환</button>
                                 {% endif %}
                                 {% if appdeployrevision.step == "CHANGE"%}
-                                    <button class="btn btn-primary" name="apply">적용</button>
+                                    <button class="btn btn-primary" name="apply" onclick='openCloseToc2();'>적용</button>
                                 {% else %}
                                     <button class="btn btn-primary" name="apply" disabled>적용</button>
                                 {% endif %}
-                                <button class="btn btn-primary" name="rollback"> 롤백 / 신규 버전 배포 취소</button>
+                                <button class="btn btn-primary" name="rollback" onclick='openCloseToc3();'> 롤백 / 신규 버전 배포 취소</button>
 
                                 <a href="{% url 'app_list' %}" class="btn btn-danger" style="float:right;" >
                                     <span class="icon text-white-50">
@@ -85,4 +114,20 @@
 
     </div>
     <!-- End of Page Wrapper -->
+
+<script>
+        function openCloseToc() {
+            document.getElementById('toc-content').style.display = 'block';
+        }
+        function openCloseToc1() {
+            document.getElementById('toc-content1').style.display = 'block';
+        }
+        function openCloseToc2() {
+            document.getElementById('toc-content2').style.display = 'block';
+        }
+        function openCloseToc3() {
+            document.getElementById('toc-content3').style.display = 'block';
+        }
+</script>
+
 {% endblock %}

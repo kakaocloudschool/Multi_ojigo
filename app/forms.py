@@ -1,5 +1,5 @@
 from django import forms
-from .models import AppInfo, Cluster, AppDeployHistory, AppDeployRevision
+from .models import AppInfo, Cluster, AppDeployHistory, AppDeployRevision, Schedule
 
 
 class DeployMethodForm(forms.Form):
@@ -18,6 +18,11 @@ class DeployMethodForm(forms.Form):
 class AppDeployRevisionForm(forms.ModelForm):
     class Meta:
         model = AppDeployRevision
+        fields = "__all__"
+
+class ScheduleForm(forms.ModelForm):
+    class Meta:
+        model = Schedule
         fields = "__all__"
 
 

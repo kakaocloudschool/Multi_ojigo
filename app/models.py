@@ -1,6 +1,5 @@
 from django.db import models
 
-
 class Cluster(models.Model):
     cluster_name = models.CharField(
         max_length=100, primary_key=True, verbose_name="클러스터 이름"
@@ -31,6 +30,28 @@ class AppInfo(models.Model):
     insert_at = models.DateTimeField(auto_now_add=True)
     update_user = models.CharField(max_length=100)
     update_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.app_name
+
+
+class Schedule(models.Model):
+    app_name = models.ForeignKey(
+        AppInfo, on_delete=models.CASCADE, verbose_name="APP 이름"
+    )
+    cluster_name = models.ForeignKey(
+        Cluster, on_delete=models.CASCADE, verbose_name="클러스터 이름"
+    )
+    auto_create_ns = models.BooleanField(default=False, verbose_name="네임스페이스 생성")
+    namespace = models.CharField(max_length=100, verbose_name="네임스페이스")
+    repo_url = models.CharField(max_length=200, verbose_name="레파지토리 주소")
+    target_revision = models.CharField(max_length=100, verbose_name="타겟 브랜치")
+    target_path = models.CharField(max_length=100, verbose_name="레파지토리 경로")
+    insert_user = models.CharField(max_length=100)
+    insert_at = models.DateTimeField(auto_now_add=True)
+    update_user = models.CharField(max_length=100)
+    update_at = models.DateTimeField(auto_now=True)
+    #schedule_dt = models.
 
     def __str__(self):
         return self.app_name
