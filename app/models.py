@@ -58,6 +58,22 @@ class Schedule(models.Model):
         return self.app_name
 
 
+class CanaryStategyMaster(models.Model):
+    sterategy = models.CharField(max_length=100)
+    step = models.CharField(max_length=10)
+    Percentage = models.CharField(max_length=3)
+    timewait = models.IntegerField()
+
+
+class CananryDeployHistory(models.Model):
+    appdeployrevision_id = models.IntegerField()
+    sterategy = models.CharField(max_length=100)
+    step = models.CharField(max_length=10)
+    Percentage = models.CharField(max_length=3)
+    timewait = models.IntegerField()
+    complete_yn = models.BooleanField()
+
+
 class AppDeployRevision(models.Model):
     app_name = models.CharField(max_length=100)
     deploy_type = models.CharField(max_length=20)
