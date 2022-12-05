@@ -71,7 +71,11 @@ class CananryDeployHistory(models.Model):
     step = models.CharField(max_length=10)
     Percentage = models.CharField(max_length=3)
     timewait = models.IntegerField()
-    complete_yn = models.BooleanField()
+    real_percentage = models.CharField(max_length=3, null=True)
+    pre_replicaset = models.IntegerField(null=True)
+    new_replicaset = models.IntegerField(null=True)
+    auto_deploy_time = models.DateTimeField(null=True)
+    complete_yn = models.CharField(max_length=1, null=True)
 
 
 class AppDeployRevision(models.Model):
@@ -90,6 +94,7 @@ class AppDeployRevision(models.Model):
     target_service = models.CharField(max_length=100, null=True)
     before_replicas = models.CharField(max_length=10, null=True)
     step = models.CharField(max_length=30)
+    canary_sterategy = models.CharField(max_length=100, null=True)
     insert_user = models.CharField(max_length=100)
     insert_at = models.DateTimeField(auto_now_add=True)
     update_user = models.CharField(max_length=100)

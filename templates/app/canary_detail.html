@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load django_bootstrap5 %}
+{% load app_extras %}
 {% block head %}
     <meta http-equiv="refresh" content="10">
 {% endblock head %}
@@ -71,10 +72,78 @@
                                     <!-- 전체 1 중에서 현재 0.5를 차지하고 있으며 적정도를 0.8로 설정했습니다. -->
                                 <hr/>
                                 </div>
-
-                                <button class="btn btn-primary" name="deploy">Canary 배포(Promote)</button>
-                                <button class="btn btn-primary" name="change">롤백</button>
-                                <button class="btn btn-primary" name="deploy">버전 확정</button>
+                                <div>
+                                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                        <thead style="text-align: center">
+                                            <tr>
+                                                <td>
+                                                    기존 파드 수
+                                                </td>
+                                                <td>
+                                                    {{ present_replicaset }}
+                                                </td>
+                                                <td rowspan="2" style=" text-align:center;  font-size: large;">{{ chg_replicaset|calc_percent:present_replicaset }} % </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    신규 파드 수
+                                                </td>
+                                                <td>
+                                                    {{ chg_replicaset }}
+                                                </td>
+                                            </tr>
+                                    </table>
+                                </div>
+                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                    <thead style="text-align: center">
+                                        <tr>
+                                            <th> 단계 </th>
+                                            <th> 비율 </th>
+                                            <th> Delay Time</th>
+                                            <th> 변경 실제 비율 </th>
+                                            <th> 기존 파드 수 </th>
+                                            <th> 신규 파드 수 </th>
+                                            <th> 승인 여부</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody style="text-align: center">
+                                            {% for canarydeploy in canarydeployhistory %}
+                                                <tr>
+                                                    <td>{{ canarydeploy.step }}</td>
+                                                    <td>{{ canarydeploy.Percentage }} %</td>
+                                                    {% if canarydeploy.Percentage == "100" %}
+                                                        <td> 완료 </td>
+                                                    {% elif canarydeploy.timewait == 0 %}
+                                                        <td> 승인 후 진행 </td>
+                                                    {% else %}
+                                                        <td> {{ canarydeploy.timewait }} 초</td>
+                                                    {% endif %}
+                                                    <td>{{ canarydeploy.new_replicaset|calc_percent:canarydeploy.pre_replicaset }} %</td>
+                                                    <td>{{ canarydeploy.pre_replicaset }}</td>
+                                                    <td>{{ canarydeploy.new_replicaset }}</td>
+                                                    {% if canarydeploy.complete_yn == "W" %}
+                                                        <td><button class="btn btn-primary" name="promote"> 승  인 </button></td>
+                                                    {% elif canarydeploy.complete_yn == "D" %}
+                                                        <td><button class="btn btn-primary" name="deploy"> 배 포 </button></td>
+                                                    {% elif canarydeploy.complete_yn == "N" %}
+                                                        <td><button class="btn btn-primary" name="" disabled> 대  기 </button></td>
+                                                    {% elif canarydeploy.complete_yn == "S" %}
+                                                        <td><button class="btn btn-primary" name="" disabled> Auto 대기 </button></td>
+                                                    {% elif canarydeploy.complete_yn == "Y" %}
+                                                        <td><button class="btn btn-success" name="" disabled> 완 료 </button></td>
+                                                    {% elif canarydeploy.complete_yn == "C" %}
+                                                        <td><button class="btn btn-primary" name="complete" disabled> 확 정 </button></td>
+                                                    {% elif canarydeploy.complete_yn == "R" %}
+                                                        <td><button class="btn btn-primary" name="complete" disabled> ROLLBACK </button></td>
+                                                    {% else %}
+                                                        <td> <button class="btn btn-secondary" name="" disabled>AUTO</button> </td>
+                                                    {% endif %}
+                                                </tr>
+                                            {% endfor %}
+                                    </tbody>
+                                </table>
+                                <button class="btn btn-primary" name="rollback">롤백</button>
+                                <button class="btn btn-primary" name="done">버전 확정</button>
 {#                                <a href="#" class="btn btn-primary" style="float:left; margin-right:15px;" type="reset" onclick='openCloseToc();'>#}
 {#                                    <button class="btn btn-primary" name="deploy">신규 버전 배포</button>#}
 {#                                    <span class="icon text-white-50">#}

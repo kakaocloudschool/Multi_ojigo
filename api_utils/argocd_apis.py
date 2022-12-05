@@ -273,6 +273,10 @@ def get_kubernetes_deployment(
     deploy["cluster_url"] = cluster_url
     deploy["labels"] = json_resp["metadata"]["labels"]
     deploy["replicas"] = json_resp["spec"]["replicas"]
+    if deploy["replicas"] == 0:
+        deploy["readyReplicas"] = 0
+    else:
+        deploy["readyReplicas"] = json_resp["status"]["readyReplicas"]
     deploy["image"] = []
     for container in json_resp["spec"]["template"]["spec"]["containers"]:
         deploy["image"].append(container["image"])
@@ -410,7 +414,63 @@ def get_app_deployment_service_info(
     return -1, "서비스 조회 실패", "", ""
 
 
-def create_deployment_bluegreen(
+def get_deployment_replicas(
+    cluster_url, cluster_token, namespace, deploy_name, replicas
+):
+    url = (
+        cluster_url
+        + "apis/apps/v1/namespaces/"
+        + namespace
+        + "/deployments/"
+        + deploy_name
+    )
+    headers = CaseInsensitiveDict()
+    headers["Accept"] = "application/json"
+    headers["Authorization"] = f"Bearer {cluster_token}"
+    resp = requests.get(url, headers=headers, verify=False)
+    if resp.status_code != 200:
+        return -1, "디플로이먼트 조회 실패", 0
+    resp_json = resp.json()
+    ready_replicas = resp_json["status"]["readyReplicas"]
+    return 1, "디플로이먼트 조회 성공", ready_replicas
+
+
+def update_deployment_scale(
+    cluster_url, cluster_token, namespace, deploy_name, replicas
+):
+    url = (
+        cluster_url
+        + "apis/apps/v1/namespaces/"
+        + namespace
+        + "/deployments/"
+        + deploy_name
+    )
+    headers = CaseInsensitiveDict()
+    headers["Accept"] = "application/json"
+    headers["Authorization"] = f"Bearer {cluster_token}"
+    resp = requests.get(url, headers=headers, verify=False)
+    if resp.status_code != 200:
+        return -1, "디플로이먼트 조회 실패"
+    resp_json = resp.json()
+    resp_json["spec"]["replicas"] = replicas
+
+    url = (
+        cluster_url
+        + "apis/apps/v1/namespaces/"
+        + namespace
+        + "/deployments/"
+        + deploy_name
+    )
+    headers = CaseInsensitiveDict()
+    headers["Accept"] = "application/json"
+    headers["Authorization"] = f"Bearer {cluster_token}"
+    resp = requests.put(url, headers=headers, data=json.dumps(resp_json), verify=False)
+    if resp.status_code != 200 and resp.status_code != 201:
+        return -1, "디플로이먼트 조회 실패"
+    return 1, "디플로이먼트 변경 성공"
+
+
+def create_deployment(
     cluster_url, cluster_token, deploy_name, namespace, image, replicas, labels
 ):
     url = cluster_url + "apis/apps/v1/namespaces/" + namespace + "/deployments"
@@ -448,6 +508,7 @@ def create_deployment_bluegreen(
         },
     }
     resp = requests.post(url, headers=headers, data=json.dumps(data), verify=False)
+
     if resp.status_code != 200 and resp.status_code != 201:
         return -1, "디플로이먼트 배포 실패"
     return 1, "디플로이먼트 배포 성공"
@@ -477,7 +538,7 @@ def change_service_select_bg_label(
     return 1, "서비스 변경 성공"
 
 
-def delete_deployment_bluegreen(cluster_url, cluster_token, deploy_name, namespace):
+def delete_deployment(cluster_url, cluster_token, deploy_name, namespace):
     url = (
         cluster_url
         + "apis/apps/v1/namespaces/"
@@ -531,7 +592,7 @@ if __name__ == "__main__":
         deploy_name = deploy_name[:-5] + "blue"
         labels["color"] = "blue"
     print(
-        create_deployment_bluegreen(
+        create_deployment(
             cluster_url=cluster_url,
             cluster_token=cluster_token,
             deploy_name=deploy_name,
