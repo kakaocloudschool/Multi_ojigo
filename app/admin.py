@@ -1,5 +1,12 @@
 from django.contrib import admin
-from .models import AppInfo, Cluster, AppDeployHistory, AppDeployRevision
+from .models import (
+    AppInfo,
+    Cluster,
+    AppDeployHistory,
+    AppDeployRevision,
+    CanaryStategyMaster,
+    CananryDeployHistory,
+)
 
 
 # Register your models here.
@@ -20,4 +27,14 @@ class AppDeployHistoryAdmin(admin.ModelAdmin):
 
 @admin.register(AppDeployRevision)
 class AppDeployRevisionAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(CanaryStategyMaster)
+class CanaryStategyMasterAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(CananryDeployHistory)
+class CananryDeployHistoryMasterAdmin(admin.ModelAdmin):
     pass
