@@ -23,7 +23,7 @@ class AppDeployRevisionForm(forms.ModelForm):
 class SchedulerForm(forms.ModelForm):
     class Meta:
         model = Scheduler
-        fields = "__all__"
+        fields = ["app_name", "deploy_type", "schedule_dt"]
         widgets = {
             "deploy_type": forms.RadioSelect,
         }

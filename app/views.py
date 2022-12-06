@@ -75,15 +75,18 @@ def schedule_list(request, pk):
     qs = Scheduler.objects.all()
     if qs:
         qs = qs.filter(app_name__app_name__exact=pk)
-    return render(request, "app/schedule_list.html", {"schedule_list": qs})
+    return render(request, "app/schedule_list.html", {"schedule_list": qs, "pk": pk})
 
 
 @login_required
-def new_schedule(request):
+def new_schedule(request, pk):
+    # appinfo = get_object_or_404(AppInfo, pk=pk)
+    print(pk)
     if request.method == "POST":
-
+        print(request.method)
         form = SchedulerForm(request.POST)
-        print("0")
+        form.app_name = pk
+        print(request.POST)
         if form.is_valid():
             print("1")
             scheduler = Scheduler()
@@ -92,8 +95,9 @@ def new_schedule(request):
             scheduler.user_id = request.user.id
 
             scheduler.save()
-            return redirect("schedule_list")
+            return render(request, "app/schedule_list.html", {"pk": pk})
     else:
+        print(request.method)
         form = SchedulerForm()
     return render(request, "app/new_schedule.html", {"form": form})
 
