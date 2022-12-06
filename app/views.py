@@ -238,6 +238,19 @@ def rollingupdate(request, pk):
             if result_code == -1:
                 messages.error(request, msg)
             else:
+                app_revision = AppDeployRevision()
+                app_revision.app_name = appinfo.app_name
+                app_revision.deploy_type = "ROLLING"
+                app_revision.cluster_name = cluster.cluster_name
+                app_revision.cluster_url = cluster.cluster_url
+                app_revision.cluster_token = cluster.bearer_token
+                app_revision.namespace = appinfo.namespace
+                app_revision.container = "GIT IMAGE"
+                app_revision.tag = "GIT Version"
+                app_revision.step = "DONE"
+                app_revision.insert_user = request.user.username
+                app_revision.update_user = request.user.username
+                app_revision.save()
                 messages.success(request, msg)
 
     return render(
@@ -571,11 +584,11 @@ def canary(request, pk):
         app_revision.update_user = request.user.username
         app_revision.canary_sterategy = request.POST["canary_strategy"]
         if app_revision.deployment is None or len(app_revision.deployment.strip()) == 0:
-            print("deployment isnone")
+            messages.error(request, "디플로이먼트를 선택해주세요.")
         elif app_revision.container is None or len(app_revision.container.strip()) == 0:
-            print("container isnone")
+            messages.error(request, "컨테이너를 선택해주세요.")
         elif app_revision.tag is None or len(app_revision.tag.strip()) == 0:
-            print("isnone")
+            messages.error(request, "버전 정보를 입력해주세요.")
         else:
             app_revision.save()
             revision = AppDeployRevision.objects.filter(
