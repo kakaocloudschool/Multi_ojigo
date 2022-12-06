@@ -1,3 +1,4 @@
+
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -53,17 +54,6 @@
     {% block head %}
     {% endblock head %}
 
-        <!— Popperjs —>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.2/dist/umd/popper.min.js"
-          crossorigin="anonymous"></script>
-    <!— Tempus Dominus JavaScript —>
-    <script src="https://cdn.jsdelivr.net/gh/Eonasdan/tempus-dominus@master/dist/js/tempus-dominus.js"
-          crossorigin="anonymous"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"
-          rel="stylesheet">
-    <!— Tempus Dominus Styles —>
-    <link href="https://cdn.jsdelivr.net/gh/Eonasdan/tempus-dominus@master/dist/css/tempus-dominus.css"
-          rel="stylesheet" crossorigin="anonymous">
 
 </head>
 
@@ -120,8 +110,24 @@
                         <a class="collapse-item" href="{% url 'new_cluster' %}">클러스터 추가</a>
                     </div>
                 </div>
+
+
             </li>
 
+            <li class="nav-item active">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#schedulemanage"
+                    aria-expanded="true" aria-controls="schedulemanage">
+                    <i class="fas fa-fw fa-wrench"></i>
+                    <span>스케줄 관리</span>
+                </a>
+                <div id="schedulemanage" class="collapse" aria-labelledby="headingUtilities"
+                    data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <a class="collapse-item" href="{% url 'schedule_list' %}">스케줄 리스트</a>
+                        <a class="collapse-item" href="jobadd">스케줄 추가</a>
+                    </div>
+                </div>
+            </li>
 
             <hr class="sidebar-divider">
 
