@@ -15,6 +15,7 @@ from .views import (
     scheduler,
     app_deploy_history,
     app_deploy_history_all,
+    schedule_list,
 )
 
 urlpatterns = [
@@ -44,6 +45,8 @@ urlpatterns = [
         name="app_deploy_history",
     ),
     # path("test_web", test_web, name="test_web"),
+
+    path("schedule_list/<str:pk>", schedule_list, name="schedule_list"),
     path("new_schedule", new_schedule, name="new_schedule"),
-    path("scheduler/<str:pk>", scheduler, name="scheduler"),
+    path("scheduler", scheduler, name="scheduler"),
 ]

@@ -49,37 +49,50 @@ def app_list(request):
     qs = AppInfo.objects.all()
     return render(request, "index.html", {"appinfo_list": qs})
 
+def scheduler(request):
+#     if request.method == "POST":
+#         form = SchedulerForm(request.POST, request.FILES)
+#         if form.is_valid():
+#             scheduler = Scheduler()
+#
+#             current_time = datetime.strptime(time, "%Y-%m-%dT%H:%M:%S")  # 현재시간을 datetime으로 변환
+#             day_limit = (current_time + timedelta(days)).date()  # 현재시간에 기간 날짜수를 더하기
+#
+#             scheduler.user_id = request.user.id
+#             # scheduler, result_code, msg = chk_and_register_cluster(scheduler)
+#             if result_code == -1:
+#                 messages.error(request, msg)
+#             else:
+#                 messages.success(request, "클러스터 생성 성공.")
+#                 cluster.save()
+#                 return redirect("scheduler")
+#     else:
+#         form = SchedulerForm()
+     return render(request, "index.html")
 
-def scheduler(request, pk):
+@login_required
+def schedule_list(request, pk):
     qs = Scheduler.objects.all()
     if qs:
         qs = qs.filter(app_name__app_name__exact=pk)
-    return render(request, "app/scheduler.html", {"scheduler": qs})
-
-
-@login_required
-def schedule_list(request):
-    qs = Cluster.objects.all()
     return render(request, "app/schedule_list.html", {"schedule_list": qs})
 
 
 @login_required
 def new_schedule(request):
     if request.method == "POST":
-        form = SchedulerForm(request.POST, request.FILES)
+
+        form = SchedulerForm(request.POST)
+        print("0")
         if form.is_valid():
+            print("1")
             scheduler = Scheduler()
-            scheduler.cluster_name = form.cleaned_data["cluster_name"]
-            scheduler.kubeconfig = form.cleaned_data["kubeconfig"]
-            scheduler.bearer_token = form.cleaned_data["bearer_token"]
-            scheduler.user_id = request.user.username
-            # scheduler, result_code, msg = chk_and_register_cluster(scheduler)
-            if result_code == -1:
-                messages.error(request, msg)
-            else:
-                messages.success(request, "클러스터 생성 성공.")
-                cluster.save()
-                return redirect("scheduler")
+            scheduler.schedule_dt = form.cleaned_data["schedule_dt"]
+            scheduler.deploy_type = form.cleaned_data["deploy_type"]
+            scheduler.user_id = request.user.id
+
+            scheduler.save()
+            return redirect("schedule_list")
     else:
         form = SchedulerForm()
     return render(request, "app/new_schedule.html", {"form": form})

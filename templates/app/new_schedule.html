@@ -29,11 +29,11 @@
                         </div>
                         <div class="card-body">
 
-                            <form method="POST" id='form'>
+                            <form action="" method="POST" id='form'>
                                 {% csrf_token %}
                                 <h5 class="m-2 font-weight-bold text-primary" style="float:left;">날짜/시간 선택 : </h5>
                                 <div class='input-group' id='datetimepicker1' data-td-target-input='nearest' data-td-target-toggle='nearest' style="width:300px;">
-                                   <input id='datetimepicker1Input' type='text' class='form-control' data-td-target='#datetimepicker1' />
+                                   <input id='datetimepicker1Input' type="text" class='form-control' data-td-target='#datetimepicker1' value='{{ schedule_dt }}'/>
                                    <span class='input-group-text' data-td-target='#datetimepicker1' data-td-toggle='datetimepicker'>
                                      <span class='fa-solid fa-calendar'></span>
                                    </span>
@@ -52,11 +52,9 @@
                                     </span>
                                     <span class="text">나가기</span>
                                 </a>
-                                <a href="#" class="btn btn-primary" style="float:right; margin-right: 15px;" >
-                                    <span class="icon text-white-50">
-                                    </span>
+                                <button class="btn btn-primary" style="float:right; margin-right: 15px;" type="submit">
                                     <span class="text">저장</span>
-                                </a>
+                                </button>
 
                             </form>
 
