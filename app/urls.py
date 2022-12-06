@@ -5,9 +5,7 @@ from .views import (
     app_list,
     cluster_list,
     deploy_app,
-    history_app,
     delete_app,
-    test_web,
     bluegreen,
     rollingupdate,
     bluegreen_detail,
@@ -15,6 +13,8 @@ from .views import (
     canary_detail,
     new_schedule,
     scheduler,
+    app_deploy_history,
+    app_deploy_history_all,
 )
 
 urlpatterns = [
@@ -37,10 +37,13 @@ urlpatterns = [
         name="canary_detail",
     ),
     path("appinfo_deploy/<str:pk>/rollingupdate", rollingupdate, name="rollingupdate"),
-    path("appinfo_history/<str:q>", history_app, name="appinfo_history"),
+    path("app_deploy_history", app_deploy_history_all, name="app_deploy_history_all"),
+    path(
+        "app_deploy_history/<str:app_name>",
+        app_deploy_history,
+        name="app_deploy_history",
+    ),
     # path("test_web", test_web, name="test_web"),
-
-
     path("new_schedule", new_schedule, name="new_schedule"),
     path("scheduler/<str:pk>", scheduler, name="scheduler"),
 ]

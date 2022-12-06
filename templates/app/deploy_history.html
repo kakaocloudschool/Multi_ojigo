@@ -51,23 +51,28 @@
                                     <thead>
                                         <tr>
                                             <th>배포 앱</th>
-                                            <th>GitHub 브런치</th>
+                                            <th>배포 클러스터</th>
                                             <th>배포 방식</th>
-                                            <th>배포자</th>
-                                            <th>승인자</th>
-                                            <th>배포 시간</th>
+                                            <th>배포 단계</th>
+                                            <th>변경 이미지</th>
+                                            <th>변경 버전</th>
+                                            <th>마지막 배포 담당자</th>
+                                            <th>마지막 배포 시간</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                     {% for history in deploy_history %}
                                         <tr>
                                             <td>{{ history.app_name }}</td>
-                                            <td>{{ history.revision }}</td>
+                                            <td>{{ history.cluster_name }}</td>
                                             <td>{{ history.deploy_type }}</td>
-                                            <td>{{ history.user }}</td>
-                                            <td>{{ history.manager_user }}</td>
+                                            <td>{{ history.step }}</td>
+                                            <td>{{ history.container }}</td>
+                                            <td>{{ history.tag }}</td>
+                                            <td>{{ history.insert_user }}</td>
                                             <td>{{ history.insert_at }}</td>
-
+                                            <td>{{ history.update_user }}</td>
+                                            <td>{{ history.update_at }}</td>
                                         </tr>
                                     {% endfor %}
                                     </tbody>

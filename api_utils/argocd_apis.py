@@ -508,7 +508,8 @@ def create_deployment(
         },
     }
     resp = requests.post(url, headers=headers, data=json.dumps(data), verify=False)
-
+    print(resp.text)
+    print(resp.status_code)
     if resp.status_code != 200 and resp.status_code != 201:
         return -1, "디플로이먼트 배포 실패"
     return 1, "디플로이먼트 배포 성공"

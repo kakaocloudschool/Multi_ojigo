@@ -113,19 +113,29 @@ class AppDeployRevision(models.Model):
 
 class AppDeployHistory(models.Model):
     MY_CHOICES = (  # 각 튜플의 첫 번째 요소는 DB에 저장할 실제 값이고, 두 번째 요소는 display 용 이름이다.
-        ("RollingUpdate", "롤링 업데이트 배포"),
-        ("BlueGreen", "블루그린 배포"),
-        ("Canary", "카나리 배포"),
+        ("ROLLINGUPDATE", "롤링 업데이트 배포"),
+        ("BLUEGREEN", "블루그린 배포"),
+        ("CANARY", "카나리 배포"),
     )
-    revision = models.CharField(max_length=100)
-    app_name = models.ForeignKey(AppInfo, on_delete=models.RESTRICT)
+    AppDeployRevision_id = models.CharField(max_length=100)
+    app_name = models.CharField(max_length=100, verbose_name="APP 이름")
     deploy_type = models.CharField(
         max_length=20, choices=MY_CHOICES, default="RollingUpdate"
     )
-    user = models.CharField(max_length=100)
-    namespace = models.CharField(max_length=100, blank=True)
-    deployment = models.CharField(max_length=100, blank=True)
-    container = models.CharField(max_length=100, blank=True)
+    cluster_name = models.CharField(max_length=100)
+    cluster_url = models.TextField()
+    cluster_token = models.TextField()
+    namespace = models.CharField(max_length=100)
+    deployment = models.CharField(max_length=100)
+    new_deployment = models.CharField(max_length=100, null=True)
+    container = models.CharField(max_length=100)
+    tag = models.CharField(max_length=100)
+    before_color = models.CharField(max_length=10, null=True)
+    change_color = models.CharField(max_length=10, null=True)
+    target_service = models.CharField(max_length=100, null=True)
+    before_replicas = models.CharField(max_length=10, null=True)
     step = models.CharField(max_length=30)
     manager_user = models.CharField(max_length=100)
+    canary_sterategy = models.CharField(max_length=100, null=True)
+    insert_user = models.CharField(max_length=100)
     insert_at = models.DateTimeField(auto_now_add=True)

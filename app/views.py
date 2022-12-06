@@ -21,7 +21,8 @@ from api_utils.argocd_apis import (
     delete_deployment,
     update_deployment_scale,
 )
-from .forms import ClusterForm, AppInfoForm, DeployForm, DeployMethodForm
+from .forms import ClusterForm, AppInfoForm, DeployForm, DeployMethodForm, SchedulerForm
+from .history_util import append_appdeployhistory
 from .models import (
     AppInfo,
     Cluster,
@@ -29,10 +30,8 @@ from .models import (
     AppDeployRevision,
     CanaryStategyMaster,
     CananryDeployHistory,
+    Scheduler,
 )
-from api_utils.kubernetes_apis import parsing_kube_confing
-from .forms import ClusterForm, AppInfoForm, DeployForm, DeployMethodForm, SchedulerForm
-from .models import AppInfo, Cluster, AppDeployHistory, AppDeployRevision, Scheduler
 
 ARGOCD_URL = getattr(settings, "ARGOCD_URL", None)
 ARGOCD_USERNAME = getattr(settings, "ARGOCD_USERNAME", None)
@@ -50,11 +49,13 @@ def app_list(request):
     qs = AppInfo.objects.all()
     return render(request, "index.html", {"appinfo_list": qs})
 
+
 def scheduler(request, pk):
     qs = Scheduler.objects.all()
     if qs:
         qs = qs.filter(app_name__app_name__exact=pk)
     return render(request, "app/scheduler.html", {"scheduler": qs})
+
 
 @login_required
 def schedule_list(request):
@@ -71,7 +72,7 @@ def new_schedule(request):
             scheduler.cluster_name = form.cleaned_data["cluster_name"]
             scheduler.kubeconfig = form.cleaned_data["kubeconfig"]
             scheduler.bearer_token = form.cleaned_data["bearer_token"]
-            scheduler.user_id = request.user.id
+            scheduler.user_id = request.user.username
             # scheduler, result_code, msg = chk_and_register_cluster(scheduler)
             if result_code == -1:
                 messages.error(request, msg)
@@ -94,7 +95,7 @@ def new_cluster(request):
             cluster.cluster_name = form.cleaned_data["cluster_name"]
             cluster.kubeconfig = form.cleaned_data["kubeconfig"]
             cluster.bearer_token = form.cleaned_data["bearer_token"]
-            cluster.user_id = request.user.id
+            cluster.user_id = request.user.username
             cluster, result_code, msg = chk_and_register_cluster(cluster)
             if result_code == -1:
                 messages.error(request, msg)
@@ -138,8 +139,8 @@ def new_app(request):
             if result_code == -1:
                 messages.error(request, msg)
             else:
-                appinfo.update_user = request.user.id
-                appinfo.insert_user = request.user.id
+                appinfo.update_user = request.user.username
+                appinfo.insert_user = request.user.username
                 appinfo.save()
                 messages.success(request, f"{appinfo.app_name} 앱 생성 성공.")
                 return redirect("app_list")
@@ -180,7 +181,7 @@ def deploy_app(request, pk):
     if len(revision) > 0:
         revision_pk = revision.aggregate(Max("pk"))["pk__max"]
         last_revision = AppDeployRevision.objects.get(pk=revision_pk)
-        if last_revision.step not in ("START", "DONE", "ROLLBACK"):
+        if last_revision.step not in ("DONE", "ROLLBACK"):
             if last_revision.deploy_type == "BLUEGREEN":
                 messages.info(request, "진행 중인 배포 작업이 있습니다.")
                 return redirect(
@@ -196,11 +197,11 @@ def deploy_app(request, pk):
                     app_name=str(appinfo.app_name),
                 )
     if form.is_valid():
-        if form.cleaned_data["deploy_type"] == "RollingUpdate":
+        if form.cleaned_data["deploy_type"] == "ROLLINGUPDATE":
             return redirect("rollingupdate", pk=appinfo.app_name)
-        elif form.cleaned_data["deploy_type"] == "BlueGreen":
+        elif form.cleaned_data["deploy_type"] == "BLUEGREEN":
             return redirect("bluegreen", pk=appinfo.app_name)
-        elif form.cleaned_data["deploy_type"] == "Canary":
+        elif form.cleaned_data["deploy_type"] == "CANARY":
             return redirect("canary", pk=appinfo.app_name)
     return render(request, "app/app_deploy.html", {"form": form})
 
@@ -274,13 +275,23 @@ def bluegreen_detail(request, pk, app_name):
             appdeployrevision.before_replicas = deploy["replicas"]
             labels = deploy["labels"]
             if labels["bluegreen"] == "blue":
-                deploy_name = deploy_name[:-4] + "green"
+                deploy_name = (
+                    appdeployrevision.deployment[:-6]
+                    + "green"
+                    + "-"
+                    + appdeployrevision.deployment[-1]
+                )
                 labels["bluegreen"] = "green"
                 bef_label = "blue"
                 chg_label = "green"
 
             elif labels["bluegreen"] == "green":
-                deploy_name = deploy_name[:-5] + "blue"
+                deploy_name = (
+                    appdeployrevision.deployment[:-5]
+                    + "blue"
+                    + "-"
+                    + appdeployrevision.deployment[-1]
+                )
                 labels["bluegreen"] = "blue"
                 bef_label = "green"
                 chg_label = "blue"
@@ -294,13 +305,15 @@ def bluegreen_detail(request, pk, app_name):
                 replicas=appdeployrevision.before_replicas,
                 labels=labels,
             )
+            print(result_code)
             if result_code == 1:
                 messages.success(request, msg)
                 appdeployrevision.before_color = bef_label
                 appdeployrevision.change_color = chg_label
                 appdeployrevision.step = "DEPLOY"
-                appdeployrevision.update_user = request.user.id
+                appdeployrevision.update_user = request.user.username
                 appdeployrevision.save()
+                append_appdeployhistory(pk=appdeployrevision.id)
             else:
                 messages.error(request, msg)
         elif "change" in request.POST and appdeployrevision.step in ("DEPLOY"):
@@ -326,9 +339,10 @@ def bluegreen_detail(request, pk, app_name):
                 if result_code == 1:
                     messages.success(request, msg)
                     appdeployrevision.target_service = service_name
-                    appdeployrevision.update_user = request.user.id
+                    appdeployrevision.update_user = request.user.username
                     appdeployrevision.step = "CHANGE"
                     appdeployrevision.save()
+                    append_appdeployhistory(pk=appdeployrevision.id)
                 else:
                     messages.error(request, msg)
             else:
@@ -349,8 +363,9 @@ def bluegreen_detail(request, pk, app_name):
                 if result_code == 1:
                     messages.success(request, msg)
                     appdeployrevision.step = "DEPLOY"
-                    appdeployrevision.update_user = request.user.id
+                    appdeployrevision.update_user = request.user.username
                     appdeployrevision.save()
+                    append_appdeployhistory(pk=appdeployrevision.id)
                 else:
                     messages.error(request, msg)
             if appdeployrevision.step == "DEPLOY":
@@ -378,14 +393,15 @@ def bluegreen_detail(request, pk, app_name):
                 )
                 if result_code == 1:
                     appdeployrevision.step = "START"
-                    appdeployrevision.update_user = request.user.id
+                    appdeployrevision.update_user = request.user.username
                     appdeployrevision.save()
                 else:
                     messages.error(request, msg)
             if appdeployrevision.step == "START":
                 appdeployrevision.step = "ROLLBACK"
-                appdeployrevision.update_user = request.user.id
+                appdeployrevision.update_user = request.user.username
                 appdeployrevision.save()
+                append_appdeployhistory(pk=appdeployrevision.id)
                 messages.success(request, "롤백 / 선택 취소 성공")
                 return redirect("app_list")
 
@@ -401,6 +417,7 @@ def bluegreen_detail(request, pk, app_name):
                 messages.success(request, "적용 완료")
                 appdeployrevision.step = "DONE"
                 appdeployrevision.save()
+                append_appdeployhistory(pk=appdeployrevision.id)
                 return redirect("app_list")
             else:
                 messages.error(request, msg)
@@ -435,6 +452,10 @@ def bluegreen(request, pk):
                     pk=last_revision.pk,
                     app_name=str(appinfo.app_name),
                 )
+    else:
+        messages.info(request, "최초 배포가 진행된 상태에서 진행 가능합니다.(롤링 업데이트 필요)")
+        return redirect("appinfo_deploy", pk=str(appinfo.app_name))
+
     if request.method == "POST":
         app_revision = AppDeployRevision()
         app_revision.app_name = appinfo.app_name
@@ -447,8 +468,8 @@ def bluegreen(request, pk):
         app_revision.container = request.POST["container"]
         app_revision.tag = request.POST["version"]
         app_revision.step = "START"
-        app_revision.insert_user = request.user.id
-        app_revision.update_user = request.user.id
+        app_revision.insert_user = request.user.username
+        app_revision.update_user = request.user.username
         if app_revision.tag is None or len(app_revision.tag.strip()) == 0:
             print("isnone")
         else:
@@ -457,6 +478,7 @@ def bluegreen(request, pk):
                 app_name=str(app_revision.app_name)
             )
             revision_pk = revision.aggregate(Max("pk"))["pk__max"]
+            append_appdeployhistory(pk=revision_pk)
             return redirect(
                 "bluegreen_detail", pk=revision_pk, app_name=appinfo.app_name
             )
@@ -529,6 +551,10 @@ def canary(request, pk):
                     pk=last_revision.pk,
                     app_name=str(appinfo.app_name),
                 )
+    else:
+        messages.info(request, "최초 배포가 진행된 상태에서 진행 가능합니다.(롤링 업데이트 필요)")
+        return redirect("appinfo_deploy", pk=str(appinfo.app_name))
+
     if request.method == "POST":
         app_revision = AppDeployRevision()
         app_revision.app_name = appinfo.app_name
@@ -541,8 +567,8 @@ def canary(request, pk):
         app_revision.container = request.POST["container"]
         app_revision.tag = request.POST["version"]
         app_revision.step = "START"
-        app_revision.insert_user = request.user.id
-        app_revision.update_user = request.user.id
+        app_revision.insert_user = request.user.username
+        app_revision.update_user = request.user.username
         app_revision.canary_sterategy = request.POST["canary_strategy"]
         if app_revision.deployment is None or len(app_revision.deployment.strip()) == 0:
             print("deployment isnone")
@@ -556,6 +582,7 @@ def canary(request, pk):
                 app_name=str(app_revision.app_name)
             )
             revision_pk = revision.aggregate(Max("pk"))["pk__max"]
+            append_appdeployhistory(pk=revision_pk)
 
             canary_masters = CanaryStategyMaster.objects.filter(
                 sterategy=app_revision.canary_sterategy
@@ -636,6 +663,7 @@ def canary_detail(request, pk, app_name):
         if appdeployrevision.before_replicas is None:
             appdeployrevision.before_replicas = deploy["replicas"]
             appdeployrevision.save()
+            append_appdeployhistory(pk=appdeployrevision.id)
             cur_replicaset = appdeployrevision.before_replicas
             max_replicaset = appdeployrevision.before_replicas + 1
             for canary in canarydeployhistory:
@@ -714,8 +742,9 @@ def canary_detail(request, pk, app_name):
                         )
                     if result_code == 1:
                         appdeployrevision.step = canarydeploy.step
-                        appdeployrevision.update_user = request.user.id
+                        appdeployrevision.update_user = request.user.username
                         appdeployrevision.save()
+                        append_appdeployhistory(pk=appdeployrevision.id)
                         canarydeploy.complete_yn = "Y"
                         canarydeploy.save()
                         for canDeploy in canarydeployhistory:
@@ -746,8 +775,9 @@ def canary_detail(request, pk, app_name):
             )
             if result_code != -1:
                 appdeployrevision.step = "ROLLBACK"
-                appdeployrevision.update_user = request.user.id
+                appdeployrevision.update_user = request.user.username
                 appdeployrevision.save()
+                append_appdeployhistory(pk=appdeployrevision.id)
                 messages.success(request, "롤백이 완료 되었습니다.")
                 return redirect("app_list")
 
@@ -794,8 +824,9 @@ def canary_detail(request, pk, app_name):
                 appdeployrevision.change_color = chg_label
                 appdeployrevision.new_deployment = deploy_name
                 appdeployrevision.step = "DEPLOY"
-                appdeployrevision.update_user = request.user.id
+                appdeployrevision.update_user = request.user.username
                 appdeployrevision.save()
+                append_appdeployhistory(pk=appdeployrevision.id)
                 if result_code == 1:
                     for cananryDeploy in canarydeployhistory:
                         if cananryDeploy.step == "1":
@@ -858,8 +889,9 @@ def canary_detail(request, pk, app_name):
                     )
                 if result_code == 1:
                     appdeployrevision.step = canarydeploy.step
-                    appdeployrevision.update_user = request.user.id
+                    appdeployrevision.update_user = request.user.username
                     appdeployrevision.save()
+                    append_appdeployhistory(pk=appdeployrevision.id)
                     canarydeploy.complete_yn = "Y"
                     canarydeploy.save()
                     for canDeploy in canarydeployhistory:
@@ -897,11 +929,16 @@ def canary_detail(request, pk, app_name):
                     messages.success(request, "롤백이 진행되고 있습니다. 잠시만 기다려주세요.")
                     appdeployrevision.step = "ROLLBACK_BEF"
                     appdeployrevision.save()
+                    append_appdeployhistory(pk=appdeployrevision.id)
                 else:
                     print(msg)
-            for canarydeploy in canarydeployhistory:
-                canarydeploy.complete_yn = "R"
-                canarydeploy.save()
+                for canarydeploy in canarydeployhistory:
+                    canarydeploy.complete_yn = "R"
+                    canarydeploy.save()
+            else:
+                messages.success(request, "선택이 취소되었습니다.")
+                appdeployrevision.step = "ROLLBACK"
+                appdeployrevision.save()
         elif "done" in request.POST and appdeployrevision.step not in ("DONE"):
             print("test2")
 
@@ -922,17 +959,18 @@ def canary_detail(request, pk, app_name):
 
 # !수정
 @login_required
-def history_app(request, q):
-    qs = AppDeployHistory.objects.all()
-    # q = request.GET.get("q", "")
-    if qs:
-        qs = qs.filter(app_name__app_name__exact=q)
+def app_deploy_history(request, app_name):
+    qs = AppDeployRevision.objects.all()
+    if app_name is not None:
+        qs = qs.filter(app_name__exact=app_name)
+    return render(request, "app/deploy_history.html", {"deploy_history": qs})
+
+
+@login_required
+def app_deploy_history_all(request):
+    qs = AppDeployRevision.objects.all()
     return render(request, "app/deploy_history.html", {"deploy_history": qs})
 
 
 def test_web(request):
     return render(request, "test.html")
-
-
-
-
