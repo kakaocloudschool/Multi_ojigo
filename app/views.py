@@ -1,5 +1,5 @@
 import datetime
-from datetime import time
+from datetime import time, datetime, timedelta
 
 from django.contrib.auth.decorators import login_required
 from django.db.models import Max
@@ -80,19 +80,60 @@ def schedule_list(request, pk):
         qs = qs.filter(app_name__app_name__exact=pk)
     return render(request, "app/schedule_list.html", {"schedule_list": qs, "pk": pk})
 
+def str_to_date(test):
+    # print(test)
+
+    if test.rfind('오후') == -1:
+        test_str = test.replace('오전', '')
+        test_date = test_str.replace('. ', )
+        test_slice = test_date.replace('- ', ' ')
+        test_join = ":".join((test_slice, '00'))
+        if len(test_join) < 19:
+            test_list = test_join.split()
+            test_join = " 0".join(test_list)
+    else:
+        test_str = test.replace('오후', '')
+        test_date = test_str.replace('. ', '-')
+        test_slice = test_date.replace('- ', ' ')
+        test_join = ":".join((test_slice, '00'))
+        index1 = test_join.find(' ')
+        if len(test_join) < 19:
+            hour = int(test_join[index1+1:index1+2])
+            hour += 12
+            test_list = test_join[:index1+1]
+            test_list2 = test_join[index1+2:]
+            test_join = test_list + str(hour) + test_list2
+        else:
+            hour = int(test_join[index1+1:index1+3])
+            hour += 12
+            test_list = test_join[:index1+1]
+            test_list2 = test_join[index1+3:]
+            test_join = test_list + str(hour) + test_list2
+    return test_join
 
 @login_required
 def new_schedule(request, pk):
     # appinfo = get_object_or_404(AppInfo, pk=pk)
-    print(pk)
+    # print(pk)
     if request.method == "POST":
-        print(request.method)
-        form = SchedulerForm(request.POST)
-        form.app_name = pk
-        print(request.POST)
+        # print(request.method)
+        # form = SchedulerForm(request.POST, appinfo)
+        post_copy = request.POST.copy()
+        print(post_copy)
+        value = post_copy['schedule_dt']
+        date_str = str_to_date(value)
+        date_value = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
+        print(date_value, type(date_value))
+
+        post_copy['schedule_dt'] = date_value
+        post_copy['app_name'] = pk
+        print(post_copy)
+        form = SchedulerForm(post_copy)
+
         if form.is_valid():
             print("1")
             scheduler = Scheduler()
+            scheduler.app_name = form.cleaned_data["app_name"]
             scheduler.schedule_dt = form.cleaned_data["schedule_dt"]
             scheduler.deploy_type = form.cleaned_data["deploy_type"]
             scheduler.user_id = request.user.id

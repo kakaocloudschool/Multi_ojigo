@@ -1,6 +1,23 @@
+
 {% extends 'base.html' %}
 {% load django_bootstrap5 %}
+{% load static %}
 
+{% block head %}
+    <!— Popperjs —>
+    <script src="{% static 'js/cdn.js' %}"
+          crossorigin="anonymous"></script>
+    <!— Tempus Dominus JavaScript —>
+    <script src="{% static 'js/date.js' %}"></script>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"
+          rel="stylesheet">
+    <!— Tempus Dominus Styles —>
+    <link href="https://cdn.jsdelivr.net/gh/Eonasdan/tempus-dominus@master/dist/css/tempus-dominus.css"
+          rel="stylesheet" crossorigin="anonymous">
+
+
+{% endblock head %}
 {% block content %}
 
     <!-- Page Wrapper -->
@@ -31,13 +48,21 @@
 
                             <form action="" method="POST" id='form'>
                                 {% csrf_token %}
+
                                 <h5 class="m-2 font-weight-bold text-primary" style="float:left;">날짜/시간 선택 : </h5>
-                                <div class='input-group' id='datetimepicker1' data-td-target-input='nearest' data-td-target-toggle='nearest' style="width:300px;">
-                                   <input id='datetimepicker1Input' type="text" class='form-control' data-td-target='#datetimepicker1' name="schedule_dt" value='{{ schedule_dt }}'/>
-                                   <span class='input-group-text' data-td-target='#datetimepicker1' data-td-toggle='datetimepicker'>
-                                     <span class='fa-solid fa-calendar'></span>
+                                <div class='input-group' id='datetimepicker1' data-td-target-input='nearest' data-td-target-toggle='nearest' style="width:300px;" >
+                                   <input id='datetimepicker1Input' type="datetime" class='form-control' data-td-target='#datetimepicker1' name="schedule_dt" value='{{ schedule_dt }}' />
+                                   <span class='input-group-text' data-td-target='#datetimepicker1' data-td-toggle='datetimepicker' >
+                                     <span class='fa-solid fa-calendar' onclick="str_to_date();"></span>
                                    </span>
                                 </div>
+                                    <script type="text/javascript">
+
+                                        $('.fa-solid').datetimepicker({
+                                            format: "DD-MM-YYYY HH:mm:ss"
+                                        });
+
+                                    </script>
                                 <hr style="position: relative; top: 5px;"/>
 <!--                                <h5 class="m-2 font-weight-bold text-primary">배포방식 선택 : </h5>-->
 <!--                                <div style="margin-left:10px; position: relative; top: 7px;">{{ form.deploy_type }}</div>-->
@@ -52,7 +77,7 @@
                                     </span>
                                     <span class="text">나가기</span>
                                 </a>
-                                <button class="btn btn-primary" style="float:right; margin-right: 15px;" type="submit">
+                                <button class="btn btn-primary" style="float:right; margin-right: 15px;" type="submit" >
                                     <span class="text">저장</span>
                                 </button>
 
@@ -72,6 +97,7 @@
 
     </div>
     <!-- End of Page Wrapper -->
+
 
 <script>
 new tempusDominus.TempusDominus(document.getElementById('datetimepicker1'), {
@@ -94,6 +120,58 @@ new tempusDominus.TempusDominus(document.getElementById('datetimepicker1'), {
         },
     },
 });
+
+</script>
+
+
+<script>
+function str_to_date() {
+    var test = document.getElementById("datetimepicker1Input").value;
+    var test_str;
+    var test_date;
+    var test_slice;
+    var test_join;
+    var test_list;
+    var test_list2;
+    var hour;
+    console.log(test);
+
+    if (test.indexOf('오후') == -1) {
+        test_str = test.replace('오전','');
+        test_date = test_str.replace('. ','-');
+        test_date = test_date.replace('. ','-');
+        test_slice = test_date.replace('. ','');
+        test_join = [test_slice,'00'].join(':');
+        if (test_join.length < 19){
+            test_list = test_join.split(' ');
+            test_join = test_list.join(' 0');
+        }
+    }
+    else {
+        test_str = test.replace('오후','');
+        test_date = test_str.replace('. ','-');
+        test_date = test_date.replace('. ','-');
+        test_slice = test_date.replace('. ','');
+        test_join = [test_slice,'00'].join(':');
+        index1 = test_join.indexOf(' ');
+        if (test_join.length < 19) {
+            hour = parseInt(test_join.slice(index1+1, index1+2));
+            hour += 12;
+            test_list = test_join.slice(0, index1+1);
+            test_list2 = test_join.slice(index1+2);
+            test_join = test_list + String(hour) + test_list2;
+        }
+        else {
+            hour = parseInt(test_join.slice(index1+1, index1+3));
+            hour += 12;
+            test_list = test_join.slice(0, index1+1);
+            test_list2 = test_join.slice(index1+3);
+            test_join = test_list + String(hour) + test_list2;
+        }
+    }
+    console.log(test_join);
+    test = test_join;
+}
 </script>
 
 {% endblock %}

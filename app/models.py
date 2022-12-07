@@ -61,7 +61,7 @@ class Scheduler(models.Model):
     insert_at = models.DateTimeField(auto_now_add=True)
     update_user = models.CharField(max_length=100)
     update_at = models.DateTimeField(auto_now=True)
-    schedule_dt = models.DateField(auto_now=False)
+    schedule_dt = models.DateTimeField()
     manager_user = models.CharField(max_length=100)
 
 

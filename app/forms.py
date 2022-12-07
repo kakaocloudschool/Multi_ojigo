@@ -1,7 +1,6 @@
 from django import forms
 from .models import AppInfo, Cluster, AppDeployHistory, AppDeployRevision, Scheduler
 
-
 class DeployMethodForm(forms.Form):
     cluster_url = forms.CharField(max_length=100)
     cluster_token = forms.Textarea()
