@@ -294,6 +294,7 @@ def get_kubernetes_service(
     service_dic = {}
     if resp.status_code != 200:
         return -1, "서비스 조회 실패", service_dic
+
     json_resp = resp.json()
     service_dic["name"] = service
     service_dic["namespace"] = namespace
@@ -394,6 +395,7 @@ def get_app_deployment_service_info(
 
     for namespace, services in service_dict.items():
         for service in services:
+            print("test2 :", service)
             result_code, msg, svc = get_kubernetes_service(
                 cluster_url=cluster_url,
                 cluster_token=cluster_token,
@@ -401,12 +403,16 @@ def get_app_deployment_service_info(
                 service=service,
             )
             svc_dict[service] = svc
+            print(result_code)
             if result_code != 1:
                 return -1, msg, ""
             print(svc_dict[service]["labels"])
             match = True
             for label in svc_dict[service]["labels"]:
+                print(taget_labels[label])
                 if taget_labels[label] != svc_dict[service]["labels"][label]:
+                    print(taget_labels[label])
+                    print(svc_dict[service]["labels"][label])
                     match = False
                     print("no")
             if match == True:
@@ -471,43 +477,51 @@ def update_deployment_scale(
 
 
 def create_deployment(
-    cluster_url, cluster_token, deploy_name, namespace, image, replicas, labels
+    cluster_url,
+    cluster_token,
+    deploy_name,
+    namespace,
+    image,
+    replicas,
+    labels,
+    bef_deploy_name,
 ):
+    url = (
+        cluster_url
+        + "apis/apps/v1/namespaces/"
+        + namespace
+        + "/deployments/"
+        + bef_deploy_name
+    )
+    headers = CaseInsensitiveDict()
+    headers["Accept"] = "application/json"
+    headers["Authorization"] = f"Bearer {cluster_token}"
+    resp = requests.get(url, headers=headers, verify=False)
+    if resp.status_code != 200:
+        return -1, "디플로이먼트 조회 실패", 0
+    resp_json = resp.json()
+    resp_json["metadata"].pop("resourceVersion")
+    resp_json["metadata"].pop("managedFields")
+    resp_json["metadata"].pop("creationTimestamp")
+    resp_json["metadata"].pop("annotations")
+    resp_json.pop("status")
+    resp_json["metadata"]["name"] = deploy_name
+    resp_json["metadata"]["labels"] = labels
+    resp_json["spec"]["replicas"] = replicas
+    resp_json["spec"]["selector"]["matchLabels"] = labels
+    resp_json["spec"]["template"]["metadata"]["labels"] = labels
+    for i in range(len(resp_json["spec"]["template"]["spec"]["containers"])):
+        if (
+            resp_json["spec"]["template"]["spec"]["containers"][i]["name"]
+            == bef_deploy_name
+        ):
+            resp_json["spec"]["template"]["spec"]["containers"][i]["name"] = deploy_name
+            resp_json["spec"]["template"]["spec"]["containers"][i]["image"] = image
     url = cluster_url + "apis/apps/v1/namespaces/" + namespace + "/deployments"
     headers = CaseInsensitiveDict()
     headers["Accept"] = "application/json"
     headers["Authorization"] = f"Bearer {cluster_token}"
-    data = {
-        "kind": "Deployment",
-        "apiVersion": "apps/v1",
-        "metadata": {
-            "name": deploy_name,
-            "namespace": namespace,
-            "labels": labels,
-        },
-        "spec": {
-            "replicas": replicas,
-            "selector": {
-                "matchLabels": labels,
-            },
-            "template": {
-                "metadata": {
-                    "labels": labels,
-                },
-                "spec": {
-                    "containers": [
-                        {
-                            "name": deploy_name,
-                            "image": image,
-                            "imagePullPolicy": "IfNotPresent",
-                        }
-                    ]
-                },
-            },
-            "revisionHistoryLimit": 10,
-        },
-    }
-    resp = requests.post(url, headers=headers, data=json.dumps(data), verify=False)
+    resp = requests.post(url, headers=headers, data=json.dumps(resp_json), verify=False)
     print(resp.text)
     print(resp.status_code)
     if resp.status_code != 200 and resp.status_code != 201:
@@ -518,11 +532,13 @@ def create_deployment(
 def change_service_select_bg_label(
     cluster_url, cluster_token, service_name, namespace, bg_label
 ):
+    print(service_name)
     url = cluster_url + "api/v1/namespaces/" + namespace + "/services/" + service_name
     headers = CaseInsensitiveDict()
     headers["Accept"] = "application/json"
     headers["Authorization"] = f"Bearer {cluster_token}"
     resp = requests.get(url, headers=headers, verify=False)
+    print(url)
     if resp.status_code != 200:
         return -1, "서비스 조회 실패"
     resp_json = resp.json()

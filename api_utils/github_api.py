@@ -85,8 +85,8 @@ def deploy_done(
         else:
             target_text.append(text)
 
+    print("target_path :", target_path)
     before_text = "\n".join(target_text)
-    print(before_text)
     resp = requests.get(tar_url)
     target_text = []
 
@@ -98,10 +98,10 @@ def deploy_done(
         count += 1
 
     chg_text = "\n".join(target_text)
-    print(bef_upload_url)
-
-    # test code
-    bef_upload_url = basic_api_url + "/".join(git_repo) + "/contents/" + "test.txt"
+    # # test code
+    # bef_upload_url = basic_api_url + "/".join(git_repo) + "/contents/" + "test.txt"
+    # print(before_text)
+    # print(chg_text)
 
     result_code, msg = github_edit_file(
         github_url=bef_upload_url, github_token=github_token, text_content=before_text
@@ -110,7 +110,7 @@ def deploy_done(
         return -1, "GIT 저장소 변경 실패"
 
     result_code, msg = github_edit_file(
-        github_url=bef_upload_url, github_token=github_token, text_content=chg_text
+        github_url=chg_upload_url, github_token=github_token, text_content=chg_text
     )
     if result_code == -1:
         return -1, "GIT 저장소 변경 실패"

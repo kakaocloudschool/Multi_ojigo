@@ -85,4 +85,17 @@
         <!-- End of Content Wrapper -->
 
     </div>
+<script>
+    var document = window.document;
+    $(document).ready(function(){
+        var $deploymentvar=$("#deployment");
+        var $containervar=$("#container");
+        var $containeroptions=$containervar.find('option');
+        $containervar.html($containeroptions.filter('[value=""]'));
+        $deploymentvar.on('change',function(){
+            $containervar.html($containeroptions.filter('[parent="'+this.value+'"],[value=""]'));
+            $('#container option[value=""]').prop('selected', true);
+        });
+    });
+</script>
 {% endblock %}
