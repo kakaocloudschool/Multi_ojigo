@@ -10,6 +10,10 @@ from .kubernetes_apis import (
 from django.conf import settings
 from collections import defaultdict
 
+requests.packages.urllib3.disable_warnings(
+    requests.packages.urllib3.exceptions.InsecureRequestWarning
+)
+
 # ARGOCD_URL = "https://192.168.50.104/"
 # ARGOCD_USERNAME = "admin"
 # ARGOCD_PASSWORD = "hHGfeDCRrCJ2pXCP"

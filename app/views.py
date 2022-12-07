@@ -285,6 +285,28 @@ def bluegreen_detail(request, pk, app_name):
     appdeployrevision = get_object_or_404(AppDeployRevision, pk=pk, app_name=app_name)
     if appdeployrevision.step in ("DONE", "ROLLBACK"):
         return redirect("app_list")
+    result_code, msg, deploy = get_kubernetes_deployment(
+        cluster_url=appdeployrevision.cluster_url,
+        cluster_token=appdeployrevision.cluster_token,
+        namespace=appdeployrevision.namespace,
+        deployment=appdeployrevision.deployment,
+    )
+    if result_code == -1:
+        messages.error(request, msg)
+    present_replicaset = deploy["replicas"]
+    if appdeployrevision.step == "START":
+        chg_replicaset = 0
+    else:
+        result_code, msg, deploy = get_kubernetes_deployment(
+            cluster_url=appdeployrevision.cluster_url,
+            cluster_token=appdeployrevision.cluster_token,
+            namespace=appdeployrevision.namespace,
+            deployment=appdeployrevision.new_deployment,
+        )
+        if result_code == -1:
+            messages.error(request, msg)
+        chg_replicaset = deploy["replicas"]
+
     if request.method == "POST":
         print(appdeployrevision.step)
         print(request.POST)
@@ -344,6 +366,7 @@ def bluegreen_detail(request, pk, app_name):
                 messages.success(request, msg)
                 appdeployrevision.before_color = bef_label
                 appdeployrevision.change_color = chg_label
+                appdeployrevision.new_deployment = deploy_name
                 appdeployrevision.step = "DEPLOY"
                 appdeployrevision.update_user = request.user.username
                 appdeployrevision.save()
@@ -372,12 +395,22 @@ def bluegreen_detail(request, pk, app_name):
                     bg_label=label,
                 )
                 if result_code == 1:
-                    messages.success(request, msg)
-                    appdeployrevision.target_service = service_name
-                    appdeployrevision.update_user = request.user.username
-                    appdeployrevision.step = "CHANGE"
-                    appdeployrevision.save()
-                    append_appdeployhistory(pk=appdeployrevision.id)
+                    result_code, msg = update_deployment_scale(
+                        cluster_url=appdeployrevision.cluster_url,
+                        cluster_token=appdeployrevision.cluster_token,
+                        deploy_name=appdeployrevision.deployment,
+                        namespace=appdeployrevision.namespace,
+                        replicas=0,
+                    )
+                    if result_code == 1:
+                        messages.success(request, msg)
+                        appdeployrevision.target_service = service_name
+                        appdeployrevision.update_user = request.user.username
+                        appdeployrevision.step = "CHANGE"
+                        appdeployrevision.save()
+                        append_appdeployhistory(pk=appdeployrevision.id)
+                    else:
+                        messages.error(request, msg)
                 else:
                     messages.error(request, msg)
             else:
@@ -396,11 +429,21 @@ def bluegreen_detail(request, pk, app_name):
                     bg_label=appdeployrevision.before_color,
                 )
                 if result_code == 1:
-                    messages.success(request, msg)
-                    appdeployrevision.step = "DEPLOY"
-                    appdeployrevision.update_user = request.user.username
-                    appdeployrevision.save()
-                    append_appdeployhistory(pk=appdeployrevision.id)
+                    result_code, msg = update_deployment_scale(
+                        cluster_url=appdeployrevision.cluster_url,
+                        cluster_token=appdeployrevision.cluster_token,
+                        deploy_name=appdeployrevision.deployment,
+                        namespace=appdeployrevision.namespace,
+                        replicas=int(appdeployrevision.before_replicas),
+                    )
+                    if result_code == 1:
+                        messages.success(request, msg)
+                        appdeployrevision.step = "DEPLOY"
+                        appdeployrevision.update_user = request.user.username
+                        appdeployrevision.save()
+                        append_appdeployhistory(pk=appdeployrevision.id)
+                    else:
+                        messages.error(request, msg)
                 else:
                     messages.error(request, msg)
             if appdeployrevision.step == "DEPLOY":
@@ -440,7 +483,6 @@ def bluegreen_detail(request, pk, app_name):
                 messages.success(request, "롤백 / 선택 취소 성공")
                 return redirect("app_list")
 
-        # Todo Kustomize 코드 변경 필요 (우선은 구현만 구현)
         elif "apply" in request.POST and appdeployrevision.step in ("CHANGE"):
             result_code, msg = delete_deployment(
                 cluster_url=appdeployrevision.cluster_url,
@@ -478,7 +520,11 @@ def bluegreen_detail(request, pk, app_name):
     return render(
         request,
         "app/bluegreen_detail.html",
-        {"appdeployrevision": appdeployrevision},
+        {
+            "appdeployrevision": appdeployrevision,
+            "present_replicaset": present_replicaset,
+            "chg_replicaset": chg_replicaset,
+        },
     )
 
 
@@ -1049,7 +1095,7 @@ def canary_detail(request, pk, app_name):
 # !수정
 @login_required
 def app_deploy_history(request, app_name):
-    qs = AppDeployRevision.objects.all()
+    qs = AppDeployRevision.objects.all().order_by("-pk")
     if app_name is not None:
         qs = qs.filter(app_name__exact=app_name)
     return render(request, "app/deploy_history.html", {"deploy_history": qs})
@@ -1057,7 +1103,7 @@ def app_deploy_history(request, app_name):
 
 @login_required
 def app_deploy_history_all(request):
-    qs = AppDeployRevision.objects.all()
+    qs = AppDeployRevision.objects.all().order_by("-pk")
     return render(request, "app/deploy_history.html", {"deploy_history": qs})
 
 

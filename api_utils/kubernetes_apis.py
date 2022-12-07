@@ -2,6 +2,10 @@ import requests
 from requests.structures import CaseInsensitiveDict
 import json
 
+requests.packages.urllib3.disable_warnings(
+    requests.packages.urllib3.exceptions.InsecureRequestWarning
+)
+
 
 def parsing_kube_confing(file_content):
     # with open(file_path) as f:

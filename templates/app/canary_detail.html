@@ -100,7 +100,9 @@
                                                     <td>{{ canarydeploy.new_replicaset|calc_percent:canarydeploy.pre_replicaset }} %</td>
                                                     <td>{{ canarydeploy.pre_replicaset }}</td>
                                                     <td>{{ canarydeploy.new_replicaset }}</td>
-                                                    {% if canarydeploy.complete_yn == "W" %}
+                                                    {% if appdeployrevision.step == "ROLLBACK" %}
+                                                        <td><button class="btn btn-primary" name="complete" disabled> ROLLBACK </button></td>
+                                                    {% elif canarydeploy.complete_yn == "W" %}
                                                         <td><button class="btn btn-primary" name="promote"> 승  인 </button></td>
                                                     {% elif canarydeploy.complete_yn == "D" %}
                                                         <td><button class="btn btn-primary" name="deploy"> 배 포 </button></td>
@@ -122,7 +124,11 @@
                                     </tbody>
                                 </table>
                                 <button class="btn btn-primary" name="rollback">롤백</button>
-                                <button class="btn btn-primary" name="done">버전 확정</button>
+                                {% if appdeployrevision.step == "CANARY" %}
+                                    <button class="btn btn-primary" name="done">버전 확정</button>
+                                {% else %}
+                                    <button class="btn btn-primary" name="" disabled>버전 확정</button>
+                                {% endif %}
 {#                                <a href="#" class="btn btn-primary" style="float:left; margin-right:15px;" type="reset" onclick='openCloseToc();'>#}
 {#                                    <button class="btn btn-primary" name="deploy">신규 버전 배포</button>#}
 {#                                    <span class="icon text-white-50">#}
