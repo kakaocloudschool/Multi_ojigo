@@ -50,7 +50,7 @@
                                 <div class="mb-4" >
                                     <input type="text" class="form-control form-control-user" style="float:left; margin-right:5px; width:150px; text-align:right;" id="version"
                                         placeholder="Version 입력" name="version" value="">
-                                    <button class="btn btn-primary" name="target" style="float:right;">저장</button>
+                                    <button class="btn btn-primary" name="target" style="float:right;" onclick="return confirm('CANARY 배포 권한을 요청 하시겠습니까?');" >저장</button>
                                 </div>
                                 <div class="mb-4" >
                                     <select id="canary_strategy" name="canary_strategy" class="form-control">

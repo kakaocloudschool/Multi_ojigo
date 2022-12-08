@@ -49,31 +49,45 @@
                             <div class="table-responsive">
                                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                                     <thead>
-                                        <tr>
+                                        <tr style="text-align: center">
                                             <th>배포 앱</th>
                                             <th>배포 클러스터</th>
                                             <th>배포 방식</th>
                                             <th>배포 단계</th>
                                             <th>변경 이미지</th>
                                             <th>변경 버전</th>
-                                            <th>최초 배포 담당자</th>
+                                            <th>관리자</th>
+                                            <th>배포 담당자</th>
                                             <th>최초 배포 시간</th>
-                                            <th>마지막 배포 담당자</th>
                                             <th>마지막 배포 시간</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                     {% for history in deploy_history %}
-                                        <tr>
+                                        <tr style="text-align: center">
                                             <td>{{ history.app_name }}</td>
                                             <td>{{ history.cluster_name }}</td>
                                             <td>{{ history.deploy_type }}</td>
-                                            <td>{{ history.step }}</td>
+                                            {% if history.step == "CANCEL" %}
+                                                <td>요청 취소</td>
+                                            {% elif history.step == "START" %}
+                                                <td>배포 준비</td>
+                                            {% elif history.step == "REQ" %}
+                                                <td>배포 요청</td>
+                                            {% elif history.step == "DONE" %}
+                                                <td>완료</td>
+                                            {% elif history.step == "ROLLBACK" %}
+                                                <td>롤백</td>
+                                            {% elif history.step == "DEPLOY" %}
+                                                <td>배포 중</td>
+                                            {% else %}
+                                                <td>{{ history.step }}</td>
+                                            {% endif %}
                                             <td>{{ history.container }}</td>
                                             <td>{{ history.tag }}</td>
+                                            <td>{{ history.manage_user }}</td>
                                             <td>{{ history.insert_user }}</td>
                                             <td>{{ history.insert_at }}</td>
-                                            <td>{{ history.update_user }}</td>
                                             <td>{{ history.update_at }}</td>
                                         </tr>
                                     {% endfor %}

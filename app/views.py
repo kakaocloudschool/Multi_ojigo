@@ -54,6 +54,18 @@ def app_list(request):
     return render(request, "index.html", {"appinfo_list": qs})
 
 
+@login_required
+def promote_list(request):
+    if request.user.privilege != "manager" and request.user.group != "admin":
+        redirect("app_list")
+    qs = AppDeployRevision.objects.filter(step__exact="REQ")
+    # if request.user.group != "admin":
+    #     # qs = AppDeployRevision.objects.raw('SELECT * FROM app_AppDeployRevision WHER')
+    #     appinfos = AppInfo.objects.filter(group__exact=request.user.group)
+    #     for appinfo in appinfos:
+    #         qs.filter(app_name=)
+
+
 def scheduler(request):
     #     if request.method == "POST":
     #         form = SchedulerForm(request.POST, request.FILES)
@@ -213,6 +225,7 @@ def new_app(request):
             else:
                 appinfo.update_user = request.user.username
                 appinfo.insert_user = request.user.username
+                print(request.user.group)
                 appinfo.group = request.user.group
                 appinfo.save()
                 messages.success(request, f"{appinfo.app_name} 앱 생성 성공.")
@@ -299,11 +312,16 @@ def deploy_app(request, pk):
             app_revision.namespace = appinfo.namespace
             app_revision.container = "GIT IMAGE"
             app_revision.tag = "GIT Version"
-            app_revision.step = "REQ"
+            if request.user.group == "admin" or request.user.privilege == "manager":
+                app_revision.step = "START"
+                app_revision.manage_user = request.user.username
+            else:
+                app_revision.step = "REQ"
+                messages.success(request, f"{appinfo.app_name}에 대한 배포 권한을 요청을 하였습니다.")
             app_revision.insert_user = request.user.username
             app_revision.update_user = request.user.username
             app_revision.save()
-            messages.success(request, f"{appinfo.app_name}에 대한 배포 요청을 하였습니다.")
+
             return redirect("rollingupdate", pk=appinfo.app_name)
         elif "BLUEGREEN" in request.POST:
             return redirect("bluegreen", pk=appinfo.app_name)
@@ -656,7 +674,11 @@ def bluegreen(request, pk):
         app_revision.deployment = request.POST["deployment"]
         app_revision.container = request.POST["container"]
         app_revision.tag = request.POST["version"]
-        app_revision.step = "REQ"
+        if request.user.group == "admin" or request.user.privilege == "manager":
+            app_revision.step = "START"
+            app_revision.manage_user = request.user.username
+        else:
+            app_revision.step = "REQ"
         app_revision.insert_user = request.user.username
         app_revision.update_user = request.user.username
         if app_revision.tag is None or len(app_revision.tag.strip()) == 0:
@@ -755,7 +777,11 @@ def canary(request, pk):
         app_revision.deployment = request.POST["deployment"]
         app_revision.container = request.POST["container"]
         app_revision.tag = request.POST["version"]
-        app_revision.step = "REQ"
+        if request.user.group == "admin" or request.user.privilege == "manager":
+            app_revision.step = "START"
+            app_revision.manage_user = request.user.username
+        else:
+            app_revision.step = "REQ"
         app_revision.insert_user = request.user.username
         app_revision.update_user = request.user.username
         app_revision.canary_sterategy = request.POST["canary_strategy"]
@@ -836,7 +862,7 @@ def canary(request, pk):
 def canary_detail(request, pk, app_name):
     appdeployrevision = get_object_or_404(AppDeployRevision, pk=pk, app_name=app_name)
     if (
-        appdeployrevision.step in ("DONE", "ROLLBACK")
+        appdeployrevision.step in ("DONE", "ROLLBACK", "CANCEL")
         or appdeployrevision.deploy_type != "CANARY"
     ):
         return redirect("app_list")
@@ -850,7 +876,7 @@ def canary_detail(request, pk, app_name):
     if result_code == -1:
         messages.error(request, msg)
     present_replicaset = deploy["replicas"]
-    if appdeployrevision.step == "START":
+    if appdeployrevision.step in ("START", "REQ"):
         chg_replicaset = 0
         if appdeployrevision.before_replicas is None:
             appdeployrevision.before_replicas = deploy["replicas"]
@@ -1117,7 +1143,7 @@ def canary_detail(request, pk, app_name):
             "DONE",
             "ROLLBACK",
         ):
-            if appdeployrevision.step != "START":
+            if appdeployrevision.step not in ("START", "REQ"):
                 result_code, msg = update_deployment_scale(
                     cluster_url=appdeployrevision.cluster_url,
                     cluster_token=appdeployrevision.cluster_token,
@@ -1135,9 +1161,13 @@ def canary_detail(request, pk, app_name):
                 for canarydeploy in canarydeployhistory:
                     canarydeploy.complete_yn = "R"
                     canarydeploy.save()
-            else:
+            elif appdeployrevision.step == "START":
                 messages.success(request, "선택이 취소되었습니다.")
                 appdeployrevision.step = "ROLLBACK"
+                appdeployrevision.save()
+            elif appdeployrevision.step == "REQ":
+                messages.success(request, "요청이 취소되었습니다.")
+                appdeployrevision.step = "CANCEL"
                 appdeployrevision.save()
         elif "done" in request.POST and appdeployrevision.step == "CANARY":
             result_code, msg = delete_deployment(

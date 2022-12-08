@@ -86,10 +86,13 @@
                                         </tr>
                                     </thead>
                                     <tbody style="text-align: center">
+                                             {% if appdeployrevision.step == "REQ" %}
+                                                <div style="text-align: right"><h3> &nbsp( 관리자의 승인이 필요합니다. ) </h3></div>
+                                            {% endif %}
                                             {% for canarydeploy in canarydeployhistory %}
                                                 <tr>
                                                     <td>{{ canarydeploy.step }}</td>
-                                                    <td>{{ canarydeploy.Percentage }} %</td>
+                                                    <td>{{ canarydeploy.Percentage }} </td>
                                                     {% if canarydeploy.Percentage == "100" %}
                                                         <td> 완료 </td>
                                                     {% elif canarydeploy.timewait == 0 %}
@@ -100,7 +103,9 @@
                                                     <td>{{ canarydeploy.new_replicaset|calc_percent:canarydeploy.pre_replicaset }} %</td>
                                                     <td>{{ canarydeploy.pre_replicaset }}</td>
                                                     <td>{{ canarydeploy.new_replicaset }}</td>
-                                                    {% if appdeployrevision.step == "ROLLBACK" %}
+                                                    {% if appdeployrevision.step == "REQ" %}
+                                                        <td><button class="btn btn-light" name="" disabled> 요청 대기중 </button></td>
+                                                    {% elif appdeployrevision.step == "ROLLBACK" %}
                                                         <td><button class="btn btn-primary" name="complete" disabled> ROLLBACK </button></td>
                                                     {% elif canarydeploy.complete_yn == "W" %}
                                                         <td><button class="btn btn-primary" name="promote"> 승  인 </button></td>
@@ -123,35 +128,23 @@
                                             {% endfor %}
                                     </tbody>
                                 </table>
-                                <button class="btn btn-primary" name="rollback">롤백</button>
+                                {% if appdeployrevision.step == "REQ" or appdeployrevision.step == "START" %}
+                                    <button class="btn btn-danger" name="rollback">요청 취소</button>
+                                {% elif appdeployrevision.step == "CANCEL" or appdeployrevision.step == "ROLLBACK_BEF" %}
+                                    <button class="btn btn-danger" name="rollback" disabled>요청 취소</button>
+                                {% else %}
+                                    <button class="btn btn-danger" name="rollback">롤백</button>
+                                {% endif %}
                                 {% if appdeployrevision.step == "CANARY" %}
                                     <button class="btn btn-primary" name="done">버전 확정</button>
                                 {% else %}
                                     <button class="btn btn-primary" name="" disabled>버전 확정</button>
                                 {% endif %}
-{#                                <a href="#" class="btn btn-primary" style="float:left; margin-right:15px;" type="reset" onclick='openCloseToc();'>#}
-{#                                    <button class="btn btn-primary" name="deploy">신규 버전 배포</button>#}
-{#                                    <span class="icon text-white-50">#}
-{#                                    </span>#}
-{#                                    <span class="text">배포</span>#}
-{#                                </a>#}
-{#                                <a href="#" class="btn btn-primary" style="float:left; margin-right:15px;" type="reset" onclick='openCloseToc1();'>#}
-{#                                    <span class="icon text-white-50">#}
-{#                                    </span>#}
-{#                                    <span class="text">롤백</span>#}
-{#                                </a>#}
-{#                                <a href="#" class="btn btn-primary" style="float:left; margin-right:15px;" type="reset" onclick='openCloseToc2();'>#}
-{#                                    <span class="icon text-white-50">#}
-{#                                    </span>#}
-{#                                    <span class="text">확정</span>#}
-{#                                </a>#}
                                 <a href="{% url 'app_list' %}" class="btn btn-danger" style="float:right;">
                                     <span class="icon text-white-50">
                                     </span>
                                     <span class="text">나가기</span>
                                 </a>
-
-
 
                             </form>
 
@@ -169,68 +162,4 @@
 
     </div>
     <!-- End of Page Wrapper -->
-
-
-
-    <script>
-        function chk_form() {
-        if(document.getElementById("appname").value==''){
-            alert("Version 정보를 입력해주십시오.");
-            return false;
-        }
-
-        if(document.getElementById("namespace").value==''){
-            alert("Namespace를 입력해주십시오.");
-            return false;
-        }
-        if (document.getElementById("repourl").value=='') {
-            alert('GitHub Repository를 입력해주십시오.');
-            return false;
-        }
-        if (document.getElementById("targetrevision").value=='') {
-            alert('GitHub Branch를 입력해주십시오.');
-            return false;
-        }
-        if (document.getElementById("targetpath").value=='') {
-            alert('GitHub Manifest를 입력해주십시오.');
-            return false;
-        }
-        document.getElementById('form').submit();
-        }
-    </script>
-    <script>
-        function changeBtnAWS() {
-            const btnElement = document.getElementById('dropdownMenuDeploy');
-            const clustername = document.getElementById('aws').getAttribute('data-value');
-            btnElement.innerText = clustername;
-        }
-        function changeBtnGCP() {
-            const btnElement = document.getElementById('dropdownMenuDeploy');
-            const clustername = document.getElementById('gcp').getAttribute('data-value');
-            btnElement.innerText = clustername;
-        }
-        function changeBtnHAHA() {
-            const btnElement = document.getElementById('dropdownMenuButton1');
-            const clustername = document.getElementById('haha').getAttribute('data-value');
-            btnElement.innerText = clustername;
-        }
-        function changeBtnHA() {
-            const btnElement = document.getElementById('dropdownMenuButton1');
-            const clustername = document.getElementById('ha').getAttribute('data-value');
-            btnElement.innerText = clustername;
-        }
-    </script>
-
-
-    <script>
-        function openCloseToc() {
-            document.getElementById('toc-content').style.display = 'block';
-        }
-        function openCloseToc1() {
-            document.getElementById('toc-content1').style.display = 'block';
-        }
-        function openCloseToc2() {
-            document.getElementById('toc-content2').style.display = 'block';
-        }
-    </script>
 {% endblock %}

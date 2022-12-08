@@ -69,13 +69,16 @@
                                         <br>
                                         <h3> &nbsp( 관리자 승인이 필요합니다. ) </h3>
                                     </div>
-                                {% else %}
+                                {% elif step == "CANCEL" %}
                                     <button type="submit" name="rolling_deploy" class="btn btn-primary" disabled>최신버전 배포하기</button>
                                     <button type="submit" name="cancel" class="btn btn-danger" disabled>요청 취소</button>
                                      <div>
                                         <br>
                                         <h3> 취소되었습니다. </h3>
                                     </div>
+                                {% else %}
+                                    <button type="submit" name="rolling_deploy" class="btn btn-primary" disabled>최신버전 배포하기</button>
+                                    <button type="submit" name="cancel" class="btn btn-danger" disabled>요청 취소</button>
                                 {% endif %}
                                 <a href="{% url 'app_list' %}" class="btn btn-danger" style="float:right;" >
                                     <span class="icon text-white-50">

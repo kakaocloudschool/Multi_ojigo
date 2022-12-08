@@ -94,7 +94,6 @@
                     <div class="bg-white py-2 collapse-inner rounded">
                         <a class="collapse-item" href="/">통합 배포</a>
                         <a class="collapse-item" href="{% url 'new_app' %}">신규 APP 등록</a>
-                        <a class="collapse-item" href="{% url 'app_deploy_history_all' %}">배포 이력</a>
                     </div>
                 </div>
             </li>
@@ -112,8 +111,19 @@
                         <a class="collapse-item" href="{% url 'new_cluster' %}">클러스터 추가</a>
                     </div>
                 </div>
-
-
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#deploymanage"
+                    aria-expanded="true" aria-controls="deploymanage">
+                    <i class="fas fa-fw fa-wrench"></i>
+                    <span>배포 관리</span>
+                </a>
+                <div id="deploymanage" class="collapse" aria-labelledby="headingUtilities"
+                    data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <a class="collapse-item" href="{% url 'app_deploy_history_all' %}">배포 이력</a>
+                    </div>
+                </div>
             </li>
 
 
@@ -264,7 +274,7 @@
     </div>
 
     <!-- Bootstrap core JavaScript-->
-    <script src="{% static 'css/sb-admin-2.min.css' %"></script>
+    <script src="{% static 'css/sb-admin-2.min.css' %}"></script>
     <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
     <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 

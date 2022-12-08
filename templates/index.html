@@ -14,9 +14,10 @@
                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                     <thead>
                         <tr>
-                            <th>Appname</th>
-                            <th>Cluster</th>
-                            <th>Namespace</th>
+                            <th>앱이름</th>
+                            <th>클러스터</th>
+                            <th>네임스페이스</th>
+                            <th>그룹</th>
 
                             <th style="width: 100px;">APP 삭제</th>
                             <th style="width: 100px;">APP 배포</th>
@@ -30,6 +31,7 @@
                             <td >{{ app_info.app_name }}</td>
                             <td >{{ app_info.cluster_name }}</td>
                             <td >{{ app_info.namespace }}</td>
+                            <td >{{ app_info.group }}</td>
 
                             <td>
                                 <a href="{% url 'delete_app' app_info.app_name %}" class="btn btn-danger" style="float:right; margin-right:15px;">
