@@ -255,8 +255,15 @@ def get_argo_service_deployment_name(
 
 
 def get_kubernetes_deployment(
-    cluster_url: str, cluster_token: str, namespace: str, deployment: str
+    cluster_url: str,
+    cluster_token: str,
+    namespace: str,
+    deployment: str,
 ):
+    print(cluster_url)
+    print(cluster_token)
+    print(namespace)
+    print(deployment)
     url = (
         cluster_url
         + "apis/apps/v1/namespaces/"

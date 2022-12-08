@@ -39,6 +39,8 @@ secret_file = os.path.join(BASE_DIR, "secrets.json")
 
 with open(secret_file) as f:
     secrets = json.loads(f.read())
+
+
 def get_secret(setting, secrets=secrets):
     try:
         return secrets[setting]
@@ -118,23 +120,24 @@ WSGI_APPLICATION = "Multi_ojigo.wsgi.application"
 
 pymysql.install_as_MySQLdb()
 if DEBUG:
-    # DATABASES = {
-    #      "default": {
-    #          "ENGINE": "django.db.backends.sqlite3",
-    #          "NAME": BASE_DIR / "db.sqlite3",
-    #     }
-    # }
     DATABASES = {
         "default": {
-            "ENGINE": "django.db.backends.mysql",
-            "NAME": "argocd",
-            "USER": "root",
-            "PASSWORD": "test123",
-            "HOST": "127.0.0.1",
-            "PORT": "3306",
-            "OPTIONS": {"init_command": 'SET sql_mode="STRICT_TRANS_TABLES"'},
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
         }
     }
+    # DATABASES = {
+    #     "default": {
+    #         "ENGINE": "django.db.backends.mysql",
+    #         "NAME": "argocd",
+    #         "USER": "root",
+    #         "PASSWORD": "test123",
+    #         "HOST": "127.0.0.1",
+    #         "PORT": "3306",
+    #         "OPTIONS": {"init_command": 'SET sql_mode="STRICT_TRANS_TABLES"'},
+    #     }
+    # }
+
 # else:
 #     DATABASES = {
 #         "default": {
@@ -196,4 +199,4 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-AUTH_USER_MODEL = 'accounts.CustomUser'
+AUTH_USER_MODEL = "accounts.CustomUser"

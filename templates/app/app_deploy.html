@@ -32,19 +32,30 @@
                             <form action="" method="post">
                                 {% csrf_token %}
                                 <!--radiobutton-->
-                                {% bootstrap_form form %}
+
+                                <div>
+                                    상태 동기화 요청 (즉시 배포 권한 요청)
+                                </div>
+                                <br>
+                                <div>
+                                    <button class="btn btn-primary" name="ROLLINGUPDATE" onclick="return confirm('Rolling Update 요청 하시겠습니까?');"> ROLLING UPDATE </button>
+                                </div>
+                                <br>
+                                <div>
+                                    고급 배포 (변경 이미지 선택 후 배포 요청)
+                                </div>
+                                <br>
+                                <div>
+                                    <button class="btn btn-primary" name="BLUEGREEN"> BLUEGREEN </button>
+                                    <text> 	&nbsp;	&nbsp;	&nbsp;	&nbsp;     | 	&nbsp;	&nbsp;	&nbsp;	&nbsp;    </text>
+                                    <button class="btn btn-primary" name="CANARY"> CANARY </button>
+                                </div>
                                 <hr/>
                                 <a href="{% url 'app_list' %}" class="btn btn-primary" style="float:right; margin-right:15px;">
                                     <span class="icon text-white-50">
                                     </span>
                                     <span class="text">돌아가기</span>
                                 </a>
-
-                                <button class="btn btn-primary" style="float:right; margin-right:15px;">
-                                    <span class="icon text-white-50">
-                                    </span>
-                                    <span class="text">배포</span>
-                                </button>
                             </form>
 
                         </div>

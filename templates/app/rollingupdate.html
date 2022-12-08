@@ -56,8 +56,27 @@
                             <form method="POST" id='form'>
                                 {% csrf_token %}
 
+                                {% if step == "START"%}
+                                    <button type="submit" name="rolling_deploy" class="btn btn-primary" >최신버전 배포하기</button>
+                                    <button type="submit" name="cancel" class="btn btn-danger" >요청 취소</button>
+                                    <div>
+                                    </div>
 
-                                <button type="submit" name="rolling_deploy" class="btn btn-primary" onclick="openCloseToc()">최신버전 배포하기</button>
+                                {% elif step == "REQ"  %}
+                                    <button type="submit" name="rolling_deploy" class="btn btn-primary" disabled>최신버전 배포하기</button>
+                                    <button type="submit" name="cancel" class="btn btn-danger" >요청 취소</button>
+                                    <div>
+                                        <br>
+                                        <h3> &nbsp( 관리자 승인이 필요합니다. ) </h3>
+                                    </div>
+                                {% else %}
+                                    <button type="submit" name="rolling_deploy" class="btn btn-primary" disabled>최신버전 배포하기</button>
+                                    <button type="submit" name="cancel" class="btn btn-danger" disabled>요청 취소</button>
+                                     <div>
+                                        <br>
+                                        <h3> 취소되었습니다. </h3>
+                                    </div>
+                                {% endif %}
                                 <a href="{% url 'app_list' %}" class="btn btn-danger" style="float:right;" >
                                     <span class="icon text-white-50">
                                     </span>
@@ -82,12 +101,5 @@
 
     </div>
     <!-- End of Page Wrapper -->
-
-    <script>
-        function openCloseToc() {
-            document.getElementById('toc-content').style.display = 'block';
-<!--            event.preventDefault()-->
-        }
-    </script>
 
 {% endblock %}

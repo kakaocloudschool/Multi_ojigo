@@ -1,5 +1,9 @@
 from django.contrib import admin
-from .models import CustomUser
-# Register your models here.
 
-admin.site.register(CustomUser)
+# Register your models here.
+from accounts.models import CustomUser
+
+
+@admin.register(CustomUser)
+class AppInfoAdmin(admin.ModelAdmin):
+    pass
