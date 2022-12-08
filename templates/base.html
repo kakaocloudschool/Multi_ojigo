@@ -123,6 +123,9 @@
                 <div id="deploymanage" class="collapse" aria-labelledby="headingUtilities"
                     data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
+                        {% if user.privilege == "Manager" or  user.group == "admin"%}
+                            <a class="collapse-item" href="{% url 'promote_list' %}">승인 관리</a>
+                        {% endif %}
                         <a class="collapse-item" href="{% url 'app_deploy_history_all' %}">배포 이력</a>
                     </div>
                 </div>

@@ -16,6 +16,8 @@ from .views import (
     app_deploy_history,
     app_deploy_history_all,
     schedule_list,
+    promote_list,
+    promote_list_approve,
 )
 
 urlpatterns = [
@@ -45,8 +47,9 @@ urlpatterns = [
         name="app_deploy_history",
     ),
     # path("test_web", test_web, name="test_web"),
-
     path("schedule_list/<str:pk>", schedule_list, name="schedule_list"),
     path("new_schedule/<str:pk>", new_schedule, name="new_schedule"),
     path("scheduler", scheduler, name="scheduler"),
+    path("promote_list", promote_list, name="promote_list"),
+    path("promote_list/<int:pk>", promote_list_approve, name="promote_list_approve"),
 ]

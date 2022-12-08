@@ -56,14 +56,44 @@ def app_list(request):
 
 @login_required
 def promote_list(request):
-    if request.user.privilege != "manager" and request.user.group != "admin":
-        redirect("app_list")
-    qs = AppDeployRevision.objects.filter(step__exact="REQ")
-    # if request.user.group != "admin":
-    #     # qs = AppDeployRevision.objects.raw('SELECT * FROM app_AppDeployRevision WHER')
-    #     appinfos = AppInfo.objects.filter(group__exact=request.user.group)
-    #     for appinfo in appinfos:
-    #         qs.filter(app_name=)
+    if request.user.privilege != "Manager" and request.user.group != "admin":
+        return redirect("app_list")
+    appdeployrevision = AppDeployRevision.objects.raw(
+        f"""SELECT A.* FROM app_appdeployrevision A, app_AppInfo B
+    where A.app_name = B.app_name
+    and A.step = "REQ"
+    and (B."group" = "{request.user.group}" or "admin" == "{request.user.group}")"""
+    )
+
+    return render(
+        request, "app/app_promote_list.html", {"appdeployrevision": appdeployrevision}
+    )
+
+
+@login_required
+def promote_list_approve(request, pk):
+    appendic = get_object_or_404(AppDeployRevision, pk=pk)
+    if request.user.privilege != "Manager" and request.user.group != "admin":
+        return redirect("app_list")
+    elif appendic.step != "REQ":
+        messages.info(request, "이미 처리된 대상 입니다.")
+        return redirect("promote_list")
+
+    if request.user.group == "admin":
+        appendic.step = "START"
+        appendic.manage_user = request.user.username
+        appendic.save()
+        messages.success(request, f"{appendic.app_name}의 대한 배포를 승인 하였습니다.")
+    else:
+        app_info = AppInfo.objects.filter(app_name__exact=appendic.app_name)
+        if app_info.group == request.user.group:
+            appendic.step = "START"
+            appendic.manage_user = request.user.username
+            appendic.save()
+            messages.success(request, f"{appendic.app_name}의 대한 배포를 승인 하였습니다.")
+        else:
+            messages.error(request, "다른 그룹의 앱을 배포할 수 없습니다.")
+    return redirect("promote_list")
 
 
 def scheduler(request):

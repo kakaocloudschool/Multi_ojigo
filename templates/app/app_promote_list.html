@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <!-- DataTales Example -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">승인 대기</h6>
+        </div>
+        <div class="card-body">
+            <br/><br/>
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr style="text-align: center">
+                            <th style="width: 130px;">배포 앱 이름 </th>
+                            <th>배포 클러스터</th>
+                            <th>배포 방식</th>
+                            <th>네임스페이스</th>
+                            <th>디플로이먼트</th>
+                            <th>컨테이너</th>
+                            <th>tag</th>
+                            <th>요청 유저</th>
+                            <th>요청 일시</th>
+                            <th>승인</th>
+                        </tr>
+                    </thead>
+                    <tbody style="text-align: center">
+                        {% for appdeployreq in appdeployrevision %}
+                        <tr>
+                            <td >{{ appdeployreq.app_name }}</td>
+                            <td >{{ appdeployreq.cluster_name }}</td>
+                            <td >{{ appdeployreq.deploy_type }}</td>
+                            <td >{{ appdeployreq.namespace }}</td>
+                            {% if appdeployreq.deploy_type == "ROLLING" %}
+                                <td > ALL </td>
+                            {% else %}
+                                <td >{{ appdeployreq.deployment }}</td>
+                            {% endif %}
+                            <td >{{ appdeployreq.container }}</td>
+                            <td >{{ appdeployreq.tag }}</td>
+                            <td >{{ appdeployreq.insert_user }}</td>
+                            <td >{{ appdeployreq.insert_at }}</td>
+                            <td>
+                                <a href="{% url 'promote_list_approve' appdeployreq.pk %}" class="btn btn-primary" style="float:right; margin-right:15px;">
+                                    <span class="icon text-white-50">
+                                    </span>
+                                    <span class="text">배포 승인</span>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /.container-fluid -->
+{% endblock %}
