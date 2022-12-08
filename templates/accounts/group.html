@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <!-- DataTales Example -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Group</h6>
+        </div>
+        <div class="card-body">
+
+                <a href="" class="btn btn-primary" style="float:right; margin-right:15px;">
+                    <span class="icon text-white-50">
+                    </span>
+                    <span class="text">그룹</span>
+                </a>
+            <br/>
+            <br/>
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th style="width: 130px;">a</th>
+                            <th>b</th>
+                            <th>C</th>
+                            <th>D</th>
+                            <th>E</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for group in  %}
+                        <tr>
+                            <td >{{ group.id }}</td>
+                            <td >{{ group.username }}</td>
+                            <td >{{ group.username }}</td>
+                            <td >{{ group.username }}</td>
+                            <td >{{ group.username }}</td>
+
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /.container-fluid -->
+{% endblock %}
