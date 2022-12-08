@@ -20,6 +20,8 @@ def deploy_done(
     bef_canary,
     chg_bluegreen,
     chg_canary,
+    container,
+    tag,
 ):
     basic_url = "https://raw.githubusercontent.com/"
     basic_api_url = "https://api.github.com/repos/"
@@ -28,6 +30,23 @@ def deploy_done(
     git_repo = git_repository.split("/")[-2:]
     if len(git_repo[1]) > 4 and git_repo[1][-4:] == ".git":
         git_repo[1] = git_repo[1][:-4]
+
+    chg_container_url = (
+        basic_url
+        + "/".join(git_repo)
+        + "/"
+        + target_branch
+        + "/"
+        + repository_path
+        + "/kustomization.yaml"
+    )
+    chg_container_upload_url = (
+        basic_api_url
+        + "/".join(git_repo)
+        + "/contents/"
+        + repository_path
+        + "/kustomization.yaml"
+    )
 
     bef_url = (
         basic_url
@@ -77,8 +96,29 @@ def deploy_done(
         + chg_canary
         + "/kustomization.yaml"
     )
+    headers = CaseInsensitiveDict()
+    headers["Accept"] = "application/json"
+    headers["Authorization"] = f"Bearer {github_token}"
+    resp = requests.get(chg_container_url, headers=headers, verify=False)
 
-    resp = requests.get(bef_url)
+    target_text = []
+    next_change = False
+    for text in resp.text.split("\n"):
+        if ("- name:") in text and (container) in text:
+            target_text.append(text)
+            next_change = True
+        elif next_change:
+            target_text.append(f'''  newTag: "{tag}"''')
+            next_change = False
+        else:
+            target_text.append(text)
+
+    chg_container_text = "\n".join(target_text)
+
+    headers = CaseInsensitiveDict()
+    headers["Accept"] = "application/json"
+    headers["Authorization"] = f"Bearer {github_token}"
+    resp = requests.get(bef_url, headers=headers, verify=False)
     target = "-".join(deployment.split("-")[1:-2])
 
     target_text = []
@@ -91,7 +131,10 @@ def deploy_done(
 
     print("target_path :", target_path)
     before_text = "\n".join(target_text)
-    resp = requests.get(tar_url)
+    headers = CaseInsensitiveDict()
+    headers["Accept"] = "application/json"
+    headers["Authorization"] = f"Bearer {github_token}"
+    resp = requests.get(tar_url, headers=headers, verify=False)
     target_text = []
 
     count = 0
@@ -106,6 +149,15 @@ def deploy_done(
     # bef_upload_url = basic_api_url + "/".join(git_repo) + "/contents/" + "test.txt"
     # print(before_text)
     # print(chg_text)
+
+    result_code, msg = github_edit_file(
+        github_url=chg_container_upload_url,
+        github_token=github_token,
+        text_content=chg_container_text,
+    )
+
+    if result_code == -1:
+        return -1, "컨테이너 이미지 변경 실패"
 
     result_code, msg = github_edit_file(
         github_url=bef_upload_url, github_token=github_token, text_content=before_text

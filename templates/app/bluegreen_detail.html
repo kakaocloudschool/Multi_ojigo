@@ -74,6 +74,9 @@
                                 {% if appdeployrevision.step == "START"%}
                                     <button class="btn btn-primary" name="deploy" onclick='openCloseToc();'>신규 버전 배포</button>
                                 {% else %}
+                                    {% if appdeployrevision.step == "REQ" %}
+                                        <h3> &nbsp( 관리자의 승인이 필요합니다. ) </h3>
+                                    {% endif %}
                                     <button class="btn btn-primary" name="deploy" disabled>신규 버전 배포</button>
                                 {% endif %}
                                 {% if appdeployrevision.step == "DEPLOY"%}
@@ -86,7 +89,7 @@
                                 {% else %}
                                     <button class="btn btn-primary" name="apply" disabled>적용</button>
                                 {% endif %}
-                                <button class="btn btn-primary" name="rollback" onclick='openCloseToc3();'> 롤백 / 신규 버전 배포 취소</button>
+                                <button class="btn btn-primary" name="rollback" onclick='openCloseToc3();'> 롤백 / 신규 버전 배포 / 요청 취소</button>
 
                                 <a href="{% url 'app_list' %}" class="btn btn-danger" style="float:right;" >
                                     <span class="icon text-white-50">
