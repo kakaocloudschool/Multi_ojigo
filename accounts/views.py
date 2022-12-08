@@ -14,7 +14,7 @@ def signup_view(request):
     # if request.user.group != "admin":
     #    return redirect("app_list")
     if request.method == "POST":
-        # print(request.method)
+        print(request.method)
         form = SignupForm(request.POST)
         if form.is_valid():
             # print("1")

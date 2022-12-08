@@ -51,7 +51,7 @@ def app_list(request):
         qs = AppInfo.objects.all()
     else:
         qs = AppInfo.objects.filter(group__exact=request.user.group)
-    return render(request, "index.html", {"appinfo_list": qs})
+    return render(request, "index.html", {"appinfo_list": qs, "user": request.user})
 
 
 @login_required

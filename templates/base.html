@@ -196,7 +196,7 @@
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Admin</span>
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ user.username }}</span>
                                 <img class="img-profile rounded-circle"
                                     src="{% static 'img/undraw_profile.svg' %}">
                             </a>
@@ -205,12 +205,12 @@
                                 aria-labelledby="userDropdown">
                                 <span >
                                     <i class="fas fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Signed in as admin
+                                    Show User Menu
                                 </span>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="/accounts/signup">
                                     <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    user 등록
+                                    User 등록
                                 </a>
 
                                 <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
