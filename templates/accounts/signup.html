@@ -28,9 +28,8 @@
                                     <label class="h4 text-gray-900 mb-4" style="margin-left:121px;">ID  </label>
                                     <div class="col-sm-8 mb-3 mb-sm-0">
                                         <input type="type" class="form-control form-control-user" id="username" name="username"
-                                            placeholder="user ID" value="{{ form.username.value|default_if_none:'' }} " style="float:right;">
+                                            placeholder="User ID" value="{{ form.username.value|default_if_none:'' }}" style="float:right;">
                                     </div>
-
                                 </div>
 
                                 <div class="form-group row">
@@ -52,15 +51,20 @@
                                     <label class="h4 text-gray-900 mb-4" style="margin-left:85px;"> group </label>
                                     <div class="col-sm-8">
                                         <input type="text" class="form-control form-control-user" id="group" name="group"
-                                            placeholder="group지정" value="{{ form.group.value|default_if_none:'' }}" style="float:right;">
+                                            placeholder="group 지정" value="{{ form.group.value|default_if_none:'' }}" style="float:right;">
                                     </div>
                                 </div>
 
                                 <div class="form-group row">
                                     <label class="h4 text-gray-900 mb-4" style="margin-left:55px;"> privilege </label>
                                     <div class="col-sm-8">
-                                        <input type="text" class="form-control form-control-user" id="privilege" name="privilege"
-                                            placeholder="privilege" value="{{ form.group.value|default_if_none:'' }}" style="float:right;">
+                                        <select id="privilege" name="privilege" class="form-control">
+                                            <option hidden selected value="" id="nullprivilege">privilege</option>
+                                            {% for choice in form.privilege %}
+                                                <option value="{{ choice }}"></option>
+                                            {% endfor %}
+                                        </select>
+
                                     </div>
                                 </div>
                                 <button type="submit" class="btn btn-primary" href="{% url 'accounts:login' %}" style="float:right;" >유저 생성</button>
