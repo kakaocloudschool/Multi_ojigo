@@ -206,6 +206,7 @@ def new_app(request):
             else:
                 appinfo.update_user = request.user.username
                 appinfo.insert_user = request.user.username
+                appinfo.group = request.user.group
                 appinfo.save()
                 messages.success(request, f"{appinfo.app_name} 앱 생성 성공.")
                 return redirect("app_list")
