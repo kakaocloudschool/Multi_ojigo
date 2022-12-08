@@ -137,9 +137,13 @@ def new_schedule(request, pk):
             scheduler.schedule_dt = form.cleaned_data["schedule_dt"]
             scheduler.deploy_type = form.cleaned_data["deploy_type"]
             scheduler.user_id = request.user.id
-
             scheduler.save()
-            return render(request, "app/schedule_list.html", {"pk": pk})
+
+            qs = Scheduler.objects.all()
+            if qs:
+                qs = qs.filter(app_name__app_name__exact=pk)
+
+            return render(request, "app/schedule_list.html", {"schedule_list": qs, "pk": pk})
     else:
         print(request.method)
         form = SchedulerForm()
