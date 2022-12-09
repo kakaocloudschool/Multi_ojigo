@@ -52,7 +52,7 @@ def app_list(request):
     else:
         qs = AppInfo.objects.filter(group__exact=request.user.group)
     return render(request, "index.html", {"appinfo_list": qs, "user": request.user})
-
+#new push
 
 @login_required
 def promote_list(request):
