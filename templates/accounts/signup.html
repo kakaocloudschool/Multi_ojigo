@@ -59,9 +59,9 @@
                                     <label class="h4 text-gray-900 mb-4" style="margin-left:55px;"> privilege </label>
                                     <div class="col-sm-8">
                                         <select id="privilege" name="privilege" class="form-control">
-                                            {% for choice in form.privilege %}
-                                                <option>{{ choice }}</option>
-                                            {% endfor %}
+
+                                                <option value="{{ form.privilege }}"></option>
+
                                         </select>
 
                                     </div>

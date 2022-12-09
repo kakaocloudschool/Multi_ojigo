@@ -86,11 +86,13 @@ def promote_list_approve(request, pk):
         messages.success(request, f"{appendic.app_name}의 대한 배포를 승인 하였습니다.")
     else:
         app_info = AppInfo.objects.filter(app_name__exact=appendic.app_name)
-        if app_info.group == request.user.group:
+        if len(app_info) > 0 and app_info[0].group == request.user.group:
             appendic.step = "START"
             appendic.manage_user = request.user.username
             appendic.save()
             messages.success(request, f"{appendic.app_name}의 대한 배포를 승인 하였습니다.")
+        elif len(app_info) == 0:
+            messages.error(request, "존재하지 않는 앱입니다.")
         else:
             messages.error(request, "다른 그룹의 앱을 배포할 수 없습니다.")
     return redirect("promote_list")

@@ -9,12 +9,23 @@
             <h6 class="m-0 font-weight-bold text-primary">Scheduler</h6>
         </div>
         <div class="card-body">
-
-                <a href="{% url 'new_schedule' pk %}" class="btn btn-primary" style="float:right; margin-right:15px;">
-                    <span class="icon text-white-50">
-                    </span>
-                    <span class="text">스케줄 등록</span>
-                </a>
+            <form
+                class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
+                <div class="input-group" >
+                    <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..."
+                        aria-label="Search" aria-describedby="basic-addon2">
+                    <div class="input-group-append">
+                        <button class="btn btn-primary" type="button">
+                            <i class="fas fa-search fa-sm"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+            <a href="{% url 'new_schedule' pk %}" class="btn btn-primary" style="float:right; margin-right:15px;">
+                <span class="icon text-white-50">
+                </span>
+                <span class="text">스케줄 등록</span>
+            </a>
             <br/>
             <br/>
             <div class="table-responsive">
