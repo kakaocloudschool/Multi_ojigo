@@ -1,7 +1,9 @@
 # Multi_DeployGo
 ## 카카오클라우드스쿨 최종프로젝트
-## ☁️ 프로젝트 소개
+## ☁️ 프로젝트 소개영상
+https://www.youtube.com/watch?v=89994MummJo&list=LL&index=9&ab_channel=cloudkakao
 
+### 구조도
 ![image](https://user-images.githubusercontent.com/44285158/208251820-5f6b22a6-ae53-4693-a6bc-1407a81d5b33.png)
 
 Bluegreen update
