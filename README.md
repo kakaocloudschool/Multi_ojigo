@@ -56,7 +56,9 @@ https://www.youtube.com/watch?v=89994MummJo&list=LL&index=9&ab_channel=cloudkaka
 ## ☁ 실행방법
 
 - python -m venv venv
+- venv\Scripts\activate
 - pip install -r requirements.txt
+
 - python manage.py makemigrations
 - python manage.py migrate
 - python manage.py runserver
