@@ -1,5 +1,9 @@
 # Multi_DeployGo
 ## 카카오클라우드스쿨 최종프로젝트
+
+
+<img width="451" height="253" alt="image" src="https://github.com/user-attachments/assets/84a94a4c-2557-4d07-aba7-f6bb95e04263" />
+
 ## ☁️ 프로젝트 소개영상
 https://www.youtube.com/watch?v=89994MummJo&list=LL&index=9&ab_channel=cloudkakao
 
