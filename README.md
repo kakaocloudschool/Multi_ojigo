@@ -56,6 +56,11 @@ https://www.youtube.com/watch?v=89994MummJo&list=LL&index=9&ab_channel=cloudkaka
 
 
 <br />
+## ERD
+
+
+## API 명세
+
 
 ## ☁ 실행방법
 
