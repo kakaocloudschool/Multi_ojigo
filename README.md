@@ -73,13 +73,17 @@ https://www.youtube.com/watch?v=89994MummJo&list=LL&index=9&ab_channel=cloudkaka
 
 
 <br />
-## ERD
 
 
 ## API 명세
 
-## Trouble Shooting history
+## ERD Diagram
 
+
+## Trouble Shooting history
+ - Django의 마이그레이션 기능이 종종 문제를 일으킴
+ - Bootstrap에서 날짜데이터가 string으로 받아와
+져서 date형식으로 변환하는 것에 어려움 (String type은 django의 view 단의 is_valid를 통과하지 못하여 Datetime으로 변경)
 
 ## ☁ 실행방법
 
